@@ -68,6 +68,8 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+            if str(hits[0].__class__.__name__) == "PowerUp":
+                print(hits[0].__class__.__name__)
 
     def update(self):
         self.get_keys()
@@ -118,7 +120,7 @@ class PowerUp(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(YELLOW)
+        self.image.fill(PURPLE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -141,13 +143,13 @@ class Mob(pg.sprite.Sprite):
         self.speed = 1
     def collide_with_walls(self, dir):
         if dir == 'x':
-            print('colliding on the x')
+            # print('colliding on the x')
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
                 self.vx *= -1
                 self.rect.x = self.x
         if dir == 'y':
-            print('colliding on the y')
+            # print('colliding on the y')
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
                 self.vy *= -1

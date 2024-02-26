@@ -58,6 +58,8 @@ class Game:
                     Coin(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
+                if tile == 'U':
+                    PowerUp(self, col, row)
 
     def run(self):
         # 
