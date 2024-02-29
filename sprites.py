@@ -1,6 +1,5 @@
 # This file was created by: Chris Cozort
 # This code was inspired by Zelda and informed by Chris Bradfield
-# per 4 github test
 import pygame as pg
 from settings import *
 
@@ -10,21 +9,21 @@ class Player(pg.sprite.Sprite):
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(GREEN)
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = game.player_img
+        # self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.moneybag = 0
         self.speed = 300
-        self.hitpoints = 100
     
     def get_keys(self):
-        self.vx, self.vy = 0, 0
+        self.vx, self.vy = 0, 0 
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vx = -self.speed  
+            self.vx = -self.speed
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed  
         if keys[pg.K_UP] or keys[pg.K_w]:
@@ -65,6 +64,7 @@ class Player(pg.sprite.Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
+    
     # made possible by Aayush's question!
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -73,7 +73,7 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
-                self.speed += 25
+                self.speed += 300
 
     def update(self):
         self.get_keys()
