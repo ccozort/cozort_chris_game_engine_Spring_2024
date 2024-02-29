@@ -9,8 +9,10 @@ from random import randint
 import sys
 from os import path
 
+# added this math function to round down the clock
 from math import floor
 
+# this 'cooldown' class is designed to help us control time
 class Cooldown():
     # sets all properties to zero when instantiated...
     def __init__(self):
@@ -46,6 +48,7 @@ class Game:
         # setting game clock 
         self.clock = pg.time.Clock()
         self.load_data()
+        # added images folder and image in the load_data method for use with the player
     def load_data(self):
         game_folder = path.dirname(__file__)
         img_folder = path.join(game_folder, 'images')
