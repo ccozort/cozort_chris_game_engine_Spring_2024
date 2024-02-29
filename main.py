@@ -1,5 +1,5 @@
 # This file was created by: Chris Cozort
-# per 4 is the best period
+# per 6 is the best period
 # import libraries and modules
 import pygame as pg
 from settings import *
