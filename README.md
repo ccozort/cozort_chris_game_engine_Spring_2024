@@ -43,3 +43,36 @@ Character customization
 Save progress
 Scoreboard
 Building
+
+
+
+
+
+
+Per 6
+
+Game features:
+
+Enemies
+PowerUps
+Money
+Quests
+Shop
+
+Weapons
+Currency
+Health bar
+waves of enemies
+Abilities - different
+
+Count down timer
+Maze
+Wall shifting
+Alter enemy speed
+Force fields
+
+Hp Bar
+Power Ups
+Weapons
+Game levels
+Player levels
