@@ -2,6 +2,27 @@
 # per 6 is the best period
 # import libraries and modules
 # my first source control edit
+'''
+Game design truths:
+goals, rules, feedback, freedom, what the verb, and will it form a sentence 
+
+moving enemies
+projectiles
+health bar
+addition types of powerups
+menu
+different levels
+kill enemies
+feedback when player gets powerup
+mushroom powerup for player size
+treasure box w/powerup or coins
+randomness in all of the above...
+more maps
+player death/game over
+pathing vectoring star search
+aim at mouse
+
+'''
 import pygame as pg
 from settings import *
 from sprites import *
