@@ -26,11 +26,12 @@ class Player(pg.sprite.Sprite):
     def get_keys(self):
         self.vx, self.vy = 0, 0 
         keys = pg.key.get_pressed()
+        if keys[pg.K_t]:
+            self.game.test_timer.event_reset()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed
-            self.game.test_timer.event_reset()
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.vy = -self.speed  
         if keys[pg.K_DOWN] or keys[pg.K_s]:
@@ -76,6 +77,7 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+                self.game.powerup_cooldown.countdown(5)
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
                 effect = choice(POWER_UP_EFFECTS)
@@ -187,6 +189,6 @@ class Mob(pg.sprite.Sprite):
         if self.rect.y > self.game.player.rect.y:
             self.vy = -100
         self.rect.x = self.x
-        self.collide_with_walls('x')
+        # self.collide_with_walls('x')
         self.rect.y = self.y
-        self.collide_with_walls('y')
+        # self.collide_with_walls('y')
