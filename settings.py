@@ -18,5 +18,7 @@ PURPLE = (255,0,255)
 YELLOW = (255,255,0)
 LIGHTGREY = (75,75,75)
 
+
+POWER_UP_EFFECTS = ["I can fly", "I'm invincible", "I'm bulletproof"]
 # Player settings
 # PLAYER_SPEED = 300

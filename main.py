@@ -8,6 +8,7 @@ goals, rules, feedback, freedom, what the verb, and will it form a sentence
 
 
 
+
 '''
 import pygame as pg
 from settings import *
@@ -73,6 +74,7 @@ class Game:
 
     # Create run method which runs the whole GAME
     def new(self):
+        # create timer
         self.test_timer = Cooldown()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
@@ -112,6 +114,7 @@ class Game:
          sys.exit()
 
     def update(self):
+        # tick the test timer
         self.test_timer.ticking()
         self.all_sprites.update()
     
@@ -133,6 +136,7 @@ class Game:
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
+            # draw the timer
             self.draw_text(self.screen, str(self.test_timer.countdown(45)), 24, WHITE, WIDTH/2 - 32, 2)
             pg.display.flip()
 
