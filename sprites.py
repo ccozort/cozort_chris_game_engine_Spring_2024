@@ -23,6 +23,7 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.status = ""
         self.hitpoints = 100
+        self.cooling = False
     
     def get_keys(self):
         self.vx, self.vy = 0, 0 
@@ -82,7 +83,9 @@ class Player(pg.sprite.Sprite):
                 print(hits[0].__class__.__name__)
                 effect = choice(POWER_UP_EFFECTS)
                 self.game.cooldown.cd = 5
+                self.cooling = True
                 print(effect)
+                print(self.cooling)
                 if effect == "Invincible":
                     self.status = "Invincible"
             if str(hits[0].__class__.__name__) == "Mob":
@@ -104,7 +107,10 @@ class Player(pg.sprite.Sprite):
         # add collision later
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
-        self.collide_with_group(self.game.power_ups, True)
+        if self.game.cooldown.cd < 1:
+            self.cooling = False
+        if not self.cooling:
+            self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
           
         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
