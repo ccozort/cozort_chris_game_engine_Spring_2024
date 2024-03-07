@@ -2,6 +2,7 @@
 # This code was inspired by Zelda and informed by Chris Bradfield
 import pygame as pg
 from settings import *
+from utils import *
 from random import choice
 
 class Player(pg.sprite.Sprite):
@@ -77,10 +78,10 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
-                self.game.powerup_cooldown.countdown(5)
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
                 effect = choice(POWER_UP_EFFECTS)
+                self.game.cooldown.cd = 5
                 print(effect)
                 if effect == "Invincible":
                     self.status = "Invincible"
@@ -93,6 +94,7 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.get_keys()
+        # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
