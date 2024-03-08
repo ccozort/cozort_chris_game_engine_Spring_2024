@@ -5,7 +5,7 @@
 '''
 Game design truths:
 goals, rules, feedback, freedom, what the verb, and will it form a sentence 
-
+..
 
 
 
@@ -50,6 +50,9 @@ class Game:
             for line in f:
                 print(line)
                 self.map_data.append(line)
+
+    def test_method(self):
+        print("I can be called from Sprites...")
 
     # Create run method which runs the whole GAME
     def new(self):
@@ -108,7 +111,7 @@ class Game:
         font = pg.font.Font(font_name, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
-        text_rect.topleft = (x,y)
+        text_rect.midtop = (x,y)
         surface.blit(text_surface, text_rect)
     
     def draw(self):
@@ -136,7 +139,7 @@ class Game:
             #         self.player.move(dy=1)
     def show_start_screen(self):
         self.screen.fill(BGCOLOR)
-        self.draw_text(self.screen, "This is the start screen", 24, WHITE, WIDTH/2 - 32, 2)
+        self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
     

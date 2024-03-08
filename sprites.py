@@ -29,7 +29,7 @@ class Player(pg.sprite.Sprite):
         self.vx, self.vy = 0, 0 
         keys = pg.key.get_pressed()
         if keys[pg.K_t]:
-            self.game.test_timer.event_reset()
+            self.game.test_method()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
