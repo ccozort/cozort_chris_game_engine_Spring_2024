@@ -29,6 +29,7 @@ class Game:
     def __init__(self):
         # init pygame
         pg.init()
+        pg.mixer.init()
         # set size of screen and be the screen
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
@@ -38,8 +39,10 @@ class Game:
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
         game_folder = path.dirname(__file__)
-        img_folder = path.join(game_folder, 'images')
-        self.player_img = pg.image.load(path.join(img_folder, 'autobot.png')).convert_alpha()
+        self.img_folder = path.join(game_folder, 'images')
+        self.snd_folder = path.join(game_folder, 'sounds')
+
+        self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -56,7 +59,9 @@ class Game:
 
     # Create run method which runs the whole GAME
     def new(self):
+        pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.mp3'))
         # create timer
+        
         self.cooldown = Timer(self)
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
@@ -64,6 +69,7 @@ class Game:
         self.coins = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -80,11 +86,14 @@ class Game:
                     Coin(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
+                if tile == 'M':
+                    Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
 
     def run(self):
         # 
+        pg.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
