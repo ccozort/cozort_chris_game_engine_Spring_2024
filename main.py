@@ -43,6 +43,7 @@ class Game:
         self.snd_folder = path.join(game_folder, 'sounds')
 
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
+        self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -68,6 +69,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
 
         # self.player1 = Player(self, 1, 1)

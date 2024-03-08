@@ -61,9 +61,16 @@ class Player(pg.sprite.Sprite):
             self.vy = -self.speed  
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
+        if keys[pg.K_e]:
+            print("trying to shoot...")
+            self.pew()
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071
+    def pew(self):
+        p = PewPew(self.game, self.rect.x, self.rect.y)
+        print(p.rect.x)
+        print(p.rect.y)
 
     # def move(self, dx=0, dy=0):
     #     if not self.collide_with_walls(dx, dy):
@@ -140,6 +147,30 @@ class Player(pg.sprite.Sprite):
         # if coin_hits:
         #     print("I got a coin")
         
+class PewPew(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.pew_pews
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
+        self.image.fill(ORANGE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = 10
+        print("I created a pew pew...")
+    def collide_with_group(self, group, kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        # if hits:
+        #     if str(hits[0].__class__.__name__) == "Coin":
+        #         self.moneybag += 1
+    def update(self):
+        self.collide_with_group(self.game.coins, True)
+        self.rect.y -= self.speed
+        # pass
+
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls
@@ -184,8 +215,9 @@ class Mob(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(RED)
+        self.image = self.game.mob_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -231,8 +263,9 @@ class Mob2(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         # self.image = game.mob_img
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(ORANGE)
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(ORANGE)
+        self.image = self.game.mob_img
         self.rect = self.image.get_rect()
         # self.hit_rect = MOB_HIT_RECT.copy()
         # self.hit_rect.center = self.rect.center
@@ -247,8 +280,8 @@ class Mob2(pg.sprite.Sprite):
 
     def update(self):
         self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
-        self.image = pg.transform.rotate(self.image, self.rot)
-        self.rect = self.image.get_rect()
+        # self.image = pg.transform.rotate(self.image, 45)
+        # self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.acc = vec(self.speed, 0).rotate(-self.rot)
         self.acc += self.vel * -1
