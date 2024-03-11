@@ -60,10 +60,13 @@ class Game:
 
     # Create run method which runs the whole GAME
     def new(self):
+        # loading sound for use...not used yet
         pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.mp3'))
+        self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
         # create timer
         
         self.cooldown = Timer(self)
+        self.testclass = Test()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -88,13 +91,13 @@ class Game:
                     Coin(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
-                if tile == 'M':
+                if tile == 'm':
                     Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
 
     def run(self):
-        # 
+        # start playing sound on infinite loop (loops=-1)
         pg.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:

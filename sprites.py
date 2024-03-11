@@ -26,7 +26,11 @@ def collide_with_walls(sprite, group, dir):
                 sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
             sprite.vel.y = 0
             sprite.rect.centery = sprite.pos.y
+class Test():
+    def __init__(self):
+        print("I can bring...")
 
+        
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -111,6 +115,7 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
+                self.game.collect_sound.play()
                 effect = choice(POWER_UP_EFFECTS)
                 self.game.cooldown.cd = 5
                 self.cooling = True
@@ -215,9 +220,9 @@ class Mob(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(RED)
-        self.image = self.game.mob_img
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(RED)
+        # self.image = self.game.mob_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -239,22 +244,23 @@ class Mob(pg.sprite.Sprite):
                 self.vy *= -1
                 self.rect.y = self.y
     def update(self):
-        # self.rect.x += 1
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
+        # pass
+        # # self.rect.x += 1
+        # self.x += self.vx * self.game.dt
+        # self.y += self.vy * self.game.dt
         
-        if self.rect.x < self.game.player.rect.x:
-            self.vx = 100
-        if self.rect.x > self.game.player.rect.x:
-            self.vx = -100    
-        if self.rect.y < self.game.player.rect.y:
-            self.vy = 100
-        if self.rect.y > self.game.player.rect.y:
-            self.vy = -100
+        # if self.rect.x < self.game.player.rect.x:
+        #     self.vx = 100
+        # if self.rect.x > self.game.player.rect.x:
+        #     self.vx = -100    
+        # if self.rect.y < self.game.player.rect.y:
+        #     self.vy = 100
+        # if self.rect.y > self.game.player.rect.y:
+        #     self.vy = -100
         self.rect.x = self.x
-        self.collide_with_walls('x')
+        # self.collide_with_walls('x')
         self.rect.y = self.y
-        self.collide_with_walls('y')
+        # self.collide_with_walls('y')
 
 
 class Mob2(pg.sprite.Sprite):
