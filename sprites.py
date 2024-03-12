@@ -52,10 +52,9 @@ class Player(pg.sprite.Sprite):
         self.cooling = False
         self.weapon_drawn = False
         self.pos = vec(0,0)
-    
+        
     def get_keys(self):
         self.vx, self.vy = 0, 0
-        self.weapon_drawn = False
         keys = pg.key.get_pressed()
         if keys[pg.K_t]:
             self.game.test_method()
@@ -68,16 +67,19 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
         if keys[pg.K_e]:
-            self.weapon_drawn = True
+            if not self.weapon_drawn:
+                Sword(self.game, self.rect.x+TILESIZE, self.rect.y-TILESIZE)
+                self.weapon_drawn = True
         if keys[pg.K_q]:
             print("trying to shoot...")
             self.pew()
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071
-    def draw_weapon(self):
-        if self.weapon_drawn:
-            Sword(self.game, self.rect.x+TILESIZE, self.rect.y-TILESIZE)
+        
+
+       
+
     def pew(self):
         p = PewPew(self.game, self.rect.x, self.rect.y)
         print(p.rect.x)
@@ -139,7 +141,6 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.get_keys()
-        self.draw_weapon()
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
@@ -198,17 +199,19 @@ class Sword(pg.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.speed = 10
-        print("I created a pew pew...")
+        print("I created a sword")
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
-        # if hits:
-        #     if str(hits[0].__class__.__name__) == "Coin":
-        #         self.moneybag += 1
+        if hits:
+            if str(hits[0].__class__.__name__) == "Mob":
+                print("you kilt a mob!")
     def update(self):
         # self.collide_with_group(self.game.coins, True)
         self.rect.x = self.game.player.rect.x+TILESIZE
         self.rect.y = self.game.player.rect.y-TILESIZE
+        self.collide_with_group(self.game.mobs, True)
         if not self.game.player.weapon_drawn:
+            print("killed the sword")
             self.kill()
         # pass
 

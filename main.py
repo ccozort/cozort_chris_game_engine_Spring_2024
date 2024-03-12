@@ -40,9 +40,9 @@ class Game:
         self.load_data()
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
-        game_folder = path.dirname(__file__)
-        self.img_folder = path.join(game_folder, 'images')
-        self.snd_folder = path.join(game_folder, 'sounds')
+        self.game_folder = path.dirname(__file__)
+        self.img_folder = path.join(self.game_folder, 'images')
+        self.snd_folder = path.join(self.game_folder, 'sounds')
 
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
@@ -52,19 +52,52 @@ class Game:
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(game_folder, LEVEL1), 'rt') as f:
+        with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
 
     def test_method(self):
         print("I can be called from Sprites...")
+    # added level change method
+    def change_level(self, lvl):
+        # kill all existing sprites first to save memory
+        for s in self.all_sprites:
+            s.kill()
+        # reset criteria for changing level
+        self.player.moneybag = 0
+        # reset map data list to empty
+        self.map_data = []
+        # open next level
+        with open(path.join(self.game_folder, lvl), 'rt') as f:
+            for line in f:
+                print(line)
+                self.map_data.append(line)
+        # repopulate the level with stuff
+        for row, tiles in enumerate(self.map_data):
+            print(row)
+            for col, tile in enumerate(tiles):
+                print(col)
+                if tile == '1':
+                    print("a wall at", row, col)
+                    Wall(self, col, row)
+                if tile == 'P':
+                    self.player = Player(self, col, row)
+                if tile == 'C':
+                    Coin(self, col, row)
+                if tile == 'M':
+                    Mob(self, col, row)
+                if tile == 'm':
+                    Mob2(self, col, row)
+                if tile == 'U':
+                    PowerUp(self, col, row)
 
     # Create run method which runs the whole GAME
     def new(self):
         # loading sound for use...not used yet
         pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.mp3'))
         self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
+        self.sword_sound = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.mp3'))
         # create timer
         
         self.cooldown = Timer(self)
@@ -116,6 +149,8 @@ class Game:
         # tick the test timer
         self.cooldown.ticking()
         self.all_sprites.update()
+        if self.player.moneybag > 2:
+            self.change_level(LEVEL2)
     
     def draw_grid(self):
          for x in range(0, WIDTH, TILESIZE):
@@ -145,6 +180,11 @@ class Game:
          for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
+            print('getting events...')
+            if event.type == pg.KEYUP:
+                print('a key went up')
+                if event.key == pg.K_e:
+                    self.player.weapon_drawn = False
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:
             #         self.player.move(dx=-1)
