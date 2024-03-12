@@ -22,8 +22,8 @@ class Timer():
     def countdown(self):
         if self.cd > 0:
             self.cd = self.cd - self.game.dt
-    def event_reset(self):
-        self.event_time = floor((pg.time.get_ticks())/1000)
+    # def event_reset(self):
+    #     self.event_time = floor((self.game.clock.)/1000)
     # sets current time
     def get_current_time(self):
         self.current_time = floor((pg.time.get_ticks())/1000)

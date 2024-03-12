@@ -221,8 +221,9 @@ class Mob(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
-        # self.image = self.game.mob_img
+        # self.surface = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(RED)
+        self.pic = self.game.mob_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -244,6 +245,7 @@ class Mob(pg.sprite.Sprite):
                 self.vy *= -1
                 self.rect.y = self.y
     def update(self):
+        # self.image.blit(self.game.screen, self.pic)
         # pass
         # # self.rect.x += 1
         # self.x += self.vx * self.game.dt
