@@ -21,7 +21,9 @@ from os import path
 # added this math function to round down the clock
 from math import floor
 
-
+# added level values for multiple maps
+LEVEL1 = "level1.txt"
+LEVEL2 = "level2.txt"
 
 # Define game class...
 class Game:
@@ -50,7 +52,7 @@ class Game:
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
+        with open(path.join(game_folder, LEVEL1), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
@@ -72,6 +74,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.weapons = pg.sprite.Group()
         self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
 

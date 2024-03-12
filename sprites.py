@@ -50,10 +50,12 @@ class Player(pg.sprite.Sprite):
         self.status = ""
         self.hitpoints = 100
         self.cooling = False
+        self.weapon_drawn = False
         self.pos = vec(0,0)
     
     def get_keys(self):
-        self.vx, self.vy = 0, 0 
+        self.vx, self.vy = 0, 0
+        self.weapon_drawn = False
         keys = pg.key.get_pressed()
         if keys[pg.K_t]:
             self.game.test_method()
@@ -66,11 +68,16 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
         if keys[pg.K_e]:
+            self.weapon_drawn = True
+        if keys[pg.K_q]:
             print("trying to shoot...")
             self.pew()
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071
+    def draw_weapon(self):
+        if self.weapon_drawn:
+            Sword(self.game, self.rect.x+TILESIZE, self.rect.y-TILESIZE)
     def pew(self):
         p = PewPew(self.game, self.rect.x, self.rect.y)
         print(p.rect.x)
@@ -132,15 +139,17 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.get_keys()
+        self.draw_weapon()
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
+        # this order of operations for rect settings and collision is imperative
         self.rect.x = self.x
-        # add collision later
         self.collide_with_walls('x')
         self.rect.y = self.y
-        # add collision later
         self.collide_with_walls('y')
+
+        # added coin collection with a cooldown setting
         self.collide_with_group(self.game.coins, True)
         if self.game.cooldown.cd < 1:
             self.cooling = False
@@ -174,6 +183,33 @@ class PewPew(pg.sprite.Sprite):
     def update(self):
         self.collide_with_group(self.game.coins, True)
         self.rect.y -= self.speed
+        # pass
+
+class Sword(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.weapons
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE))
+        self.image.fill(LIGHTBLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = 10
+        print("I created a pew pew...")
+    def collide_with_group(self, group, kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        # if hits:
+        #     if str(hits[0].__class__.__name__) == "Coin":
+        #         self.moneybag += 1
+    def update(self):
+        # self.collide_with_group(self.game.coins, True)
+        self.rect.x = self.game.player.rect.x+TILESIZE
+        self.rect.y = self.game.player.rect.y-TILESIZE
+        if not self.game.player.weapon_drawn:
+            self.kill()
         # pass
 
 class Wall(pg.sprite.Sprite):
@@ -222,7 +258,7 @@ class Mob(pg.sprite.Sprite):
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         # self.surface = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(RED)
+        self.image.fill(RED)
         self.pic = self.game.mob_img
         self.rect = self.image.get_rect()
         self.x = x
@@ -282,23 +318,31 @@ class Mob2(pg.sprite.Sprite):
         self.acc = vec(0, 0)
         self.rect.center = self.pos
         self.rot = 0
+        self.chase_distance = 500
         # added
         self.speed = 150
+        self.chasing = False
         # self.health = MOB_HEALTH
-
+    def sensor(self):
+        if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
+            self.chasing = True
+        else:
+            self.chasing = False
     def update(self):
-        self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
-        # self.image = pg.transform.rotate(self.image, 45)
-        # self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        self.acc = vec(self.speed, 0).rotate(-self.rot)
-        self.acc += self.vel * -1
-        self.vel += self.acc * self.game.dt
-        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-        # self.hit_rect.centerx = self.pos.x
-        collide_with_walls(self, self.game.walls, 'x')
-        # self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.walls, 'y')
-        # self.rect.center = self.hit_rect.center
-        # if self.health <= 0:
-        #     self.kill()
+        self.sensor()
+        if self.chasing:
+            self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
+            # self.image = pg.transform.rotate(self.image, 45)
+            # self.rect = self.image.get_rect()
+            self.rect.center = self.pos
+            self.acc = vec(self.speed, 0).rotate(-self.rot)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            # self.hit_rect.centerx = self.pos.x
+            collide_with_walls(self, self.game.walls, 'x')
+            # self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            # self.rect.center = self.hit_rect.center
+            # if self.health <= 0:
+            #     self.kill()
