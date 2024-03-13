@@ -46,6 +46,7 @@ class Game:
 
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
+        self.mob2_img = pg.image.load(path.join(self.img_folder, 'dragon.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -180,9 +181,7 @@ class Game:
          for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
-            print('getting events...')
             if event.type == pg.KEYUP:
-                print('a key went up')
                 if event.key == pg.K_e:
                     self.player.weapon_drawn = False
             # if event.type == pg.KEYDOWN:

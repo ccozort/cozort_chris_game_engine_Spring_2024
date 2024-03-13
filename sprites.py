@@ -52,6 +52,7 @@ class Player(pg.sprite.Sprite):
         self.cooling = False
         self.weapon_drawn = False
         self.pos = vec(0,0)
+        self.dir = vec(0,0)
         
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -60,25 +61,27 @@ class Player(pg.sprite.Sprite):
             self.game.test_method()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
+            self.dir = (-1,0)
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed
+            self.dir = (1,0)
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vy = -self.speed  
+            self.vy = -self.speed
+            self.dir = (0,-1)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
+            self.dir = (0,1)
         if keys[pg.K_e]:
             if not self.weapon_drawn:
                 Sword(self.game, self.rect.x+TILESIZE, self.rect.y-TILESIZE)
                 self.weapon_drawn = True
+                self.game.sword_sound.play()
         if keys[pg.K_q]:
             print("trying to shoot...")
             self.pew()
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071
-        
-
-       
 
     def pew(self):
         p = PewPew(self.game, self.rect.x, self.rect.y)
@@ -122,6 +125,7 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+                self.speed += 200
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
                 self.game.collect_sound.play()
@@ -207,6 +211,7 @@ class Sword(pg.sprite.Sprite):
                 print("you kilt a mob!")
     def update(self):
         # self.collide_with_group(self.game.coins, True)
+        # if self.game.player.dir
         self.rect.x = self.game.player.rect.x+TILESIZE
         self.rect.y = self.game.player.rect.y-TILESIZE
         self.collide_with_group(self.game.mobs, True)
@@ -312,7 +317,8 @@ class Mob2(pg.sprite.Sprite):
         # self.image = game.mob_img
         # self.image = pg.Surface((TILESIZE, TILESIZE))
         # self.image.fill(ORANGE)
-        self.image = self.game.mob_img
+        self.image = self.game.mob2_img
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         # self.hit_rect = MOB_HIT_RECT.copy()
         # self.hit_rect.center = self.rect.center
