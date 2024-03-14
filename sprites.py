@@ -53,29 +53,41 @@ class Player(pg.sprite.Sprite):
         self.weapon_drawn = False
         self.pos = vec(0,0)
         self.dir = vec(0,0)
-        
+    def set_dir(self, d):
+        self.dir = d
+        # return (0,0)
+    def get_dir(self):
+        return self.dir
+    def get_mouse(self):
+        if pg.mouse.get_pressed()[0]:
+            print("left click")
+        if pg.mouse.get_pressed()[1]:
+            print("middle click")
+        if pg.mouse.get_pressed()[2]:
+            print("right click")
+            
     def get_keys(self):
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
+        if keys[pg.K_e]:
+            if not self.weapon_drawn:
+                Sword(self.game, self.rect.x + self.dir[0]*32, self.rect.y + self.dir[1]*32, abs(32*self.dir[0])+5, abs(32*self.dir[1])+5)
+                self.weapon_drawn = True
+                self.game.sword_sound.play()
         if keys[pg.K_t]:
             self.game.test_method()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
-            self.dir = (-1,0)
+            self.set_dir((-1,0))
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed
-            self.dir = (1,0)
+            self.set_dir((1,0))
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.vy = -self.speed
-            self.dir = (0,-1)
+            self.set_dir((0,-1))
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
-            self.dir = (0,1)
-        if keys[pg.K_e]:
-            if not self.weapon_drawn:
-                Sword(self.game, self.rect.x+TILESIZE, self.rect.y-TILESIZE)
-                self.weapon_drawn = True
-                self.game.sword_sound.play()
+            self.set_dir((0,1))
         if keys[pg.K_q]:
             print("trying to shoot...")
             self.pew()
@@ -139,11 +151,11 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Mob":
                 # print(hits[0].__class__.__name__)
                 # print("Collided with mob")
-                # self.hitpoints -= 1
+                self.hitpoints -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
-
     def update(self):
+        self.get_mouse()
         self.get_keys()
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
@@ -191,13 +203,15 @@ class PewPew(pg.sprite.Sprite):
         # pass
 
 class Sword(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, w, h):
         self.groups = game.all_sprites, game.weapons
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE/4, TILESIZE))
+        self.image = pg.Surface((w, h))
         self.image.fill(LIGHTBLUE)
         self.rect = self.image.get_rect()
+        self.rect.w = w
+        self.rect.h = h
         self.x = x
         self.y = y
         self.rect.x = x
@@ -212,8 +226,11 @@ class Sword(pg.sprite.Sprite):
     def update(self):
         # self.collide_with_group(self.game.coins, True)
         # if self.game.player.dir
-        self.rect.x = self.game.player.rect.x+TILESIZE
-        self.rect.y = self.game.player.rect.y-TILESIZE
+        self.rect.x = self.game.player.rect.x + self.game.player.dir[0]*32
+        self.rect.y = self.game.player.rect.y + self.game.player.dir[1]*32
+        self.rect.width = abs(self.game.player.get_dir()[0]*32)+5
+        self.rect.width = abs(self.game.player.get_dir()[1]*32)+5
+        self.image.get_rect()
         self.collide_with_group(self.game.mobs, True)
         if not self.game.player.weapon_drawn:
             print("killed the sword")

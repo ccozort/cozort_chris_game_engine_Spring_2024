@@ -25,6 +25,17 @@ from math import floor
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 
+def draw_health_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 32
+    BAR_HEIGHT = 10
+    fill = (pct / 100) * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, GREEN, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
 # Define game class...
 class Game:
     # Define a special method to init the properties of said class...
@@ -171,10 +182,12 @@ class Game:
             self.screen.fill(BGCOLOR)
             # self.draw_grid()
             self.all_sprites.draw(self.screen)
+            # self.player.draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y, self.player.hitpoints)
             # draw the timer
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
             self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
+            draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             pg.display.flip()
 
     def events(self):
