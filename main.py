@@ -45,7 +45,7 @@ class Game:
         pg.display.set_caption(TITLE)
         # setting game clock 
         self.clock = pg.time.Clock()
-        self.load_data()
+        # self.load_data()
         self.running = True
         self.paused = False
         # added images folder and image in the load_data method for use with the player
@@ -105,6 +105,7 @@ class Game:
 
     # Create run method which runs the whole GAME
     def new(self):
+        self.load_data()
         # loading sound for use...not used yet
         pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.mp3'))
         self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
@@ -112,6 +113,8 @@ class Game:
         # create timer
         
         self.cooldown = Timer(self)
+        self.mob_timer = Timer(self)
+        self.mob_timer.cd = 5
         self.testclass = Test()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
@@ -160,11 +163,15 @@ class Game:
         # tick the test timer
         if not self.paused:
             self.cooldown.ticking()
+            self.mob_timer.ticking()
             self.all_sprites.update()
             if self.player.hitpoints < 1:
                 self.playing = False
             if self.player.moneybag > 2:
                 self.change_level(LEVEL2)
+            if self.mob_timer.cd < 1:
+                Mob(self, randint(1,25), randint(1,25))
+                self.mob_timer.cd = 2
     
     def draw_grid(self):
          for x in range(0, WIDTH, TILESIZE):
@@ -187,6 +194,7 @@ class Game:
             # self.player.draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y, self.player.hitpoints)
             # draw the timer
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, str(self.mob_timer.get_countdown()), 24, WHITE, WIDTH/2 - 32, 60)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             pg.display.flip()
@@ -196,6 +204,7 @@ class Game:
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYUP:
+
                 if event.key == pg.K_p:
                     if not self.paused:
                         self.paused = True
@@ -235,6 +244,7 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+
 
 # Instantiate the game... 
 g = Game()

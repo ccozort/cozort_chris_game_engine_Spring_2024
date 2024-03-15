@@ -4,6 +4,7 @@ import pygame as pg
 from settings import *
 from utils import *
 from random import choice
+from random import randint
 
 vec =pg.math.Vector2
 
@@ -61,9 +62,22 @@ class Player(pg.sprite.Sprite):
         return self.dir
     def get_mouse(self):
         if pg.mouse.get_pressed()[0]:
-            print("left click")
+            mx = pg.mouse.get_pos()[0]
+            my = pg.mouse.get_pos()[1]
+            if abs(mx-self.rect.x) > abs(my-self.rect.y):
+                if mx-self.rect.x > 0:
+                    print("swing to pos x")
+                    Sword(self.game, self.rect.x + self.rect.width, self.rect.y + self.rect.h/2, 32, 5)
+
+                if mx-self.rect.x < 0:
+                    print("swing to neg x")
+            else:
+                if my-self.rect.y > 0:
+                    print("swing to pos y")
+                if my-self.rect.y < 0:
+                    print("swing to neg y")
+                    
             if not self.weapon_drawn:
-                Sword(self.game, self.rect.x + self.dir[0]*32, self.rect.y + self.dir[1]*32, abs(32*self.dir[0])+5, abs(32*self.dir[1])+5)
                 self.weapon_drawn = True
                 self.game.sword_sound.play()
         if pg.mouse.get_pressed()[1]:
@@ -76,7 +90,9 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
          
         if keys[pg.K_t]:
-            self.game.test_method()
+            # for a in self.game.mobs:
+            #     a.kill()
+            self.game.change_level("level3.txt")
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
             self.set_dir((-1,0))
@@ -219,6 +235,7 @@ class Sword(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x
         self.rect.y = y
+        self.dir = (0,0)
         self.speed = 10
         print("I created a sword")
     def collide_with_group(self, group, kill):
@@ -236,8 +253,8 @@ class Sword(pg.sprite.Sprite):
         # if self.game.player.dir
         self.rect.x = self.game.player.rect.x + self.game.player.dir[0]*32
         self.rect.y = self.game.player.rect.y + self.game.player.dir[1]*32
-        self.rect.width = abs(self.game.player.get_dir()[0]*32)+5
-        self.rect.width = abs(self.game.player.get_dir()[1]*32)+5
+        self.rect.width = abs(self.game.player.dir[0]*32)+5
+        self.rect.width = abs(self.game.player.dir[1]*32)+5
         self.image.get_rect()
         self.collide_with_group(self.game.mobs, False)
         if not self.game.player.weapon_drawn:
@@ -298,7 +315,7 @@ class Mob(pg.sprite.Sprite):
         self.vx, self.vy = 100, 100
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.speed = 1
+        self.speed = randint(1,3)
         self.hitpoints = 4
     def collide_with_walls(self, dir):
         if dir == 'x':
@@ -319,17 +336,17 @@ class Mob(pg.sprite.Sprite):
         # self.image.blit(self.game.screen, self.pic)
         # pass
         # # self.rect.x += 1
-        # self.x += self.vx * self.game.dt
-        # self.y += self.vy * self.game.dt
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
         
-        # if self.rect.x < self.game.player.rect.x:
-        #     self.vx = 100
-        # if self.rect.x > self.game.player.rect.x:
-        #     self.vx = -100    
-        # if self.rect.y < self.game.player.rect.y:
-        #     self.vy = 100
-        # if self.rect.y > self.game.player.rect.y:
-        #     self.vy = -100
+        if self.rect.x < self.game.player.rect.x:
+            self.vx = 100
+        if self.rect.x > self.game.player.rect.x:
+            self.vx = -100    
+        if self.rect.y < self.game.player.rect.y:
+            self.vy = 100
+        if self.rect.y > self.game.player.rect.y:
+            self.vy = -100
         self.rect.x = self.x
         # self.collide_with_walls('x')
         self.rect.y = self.y
