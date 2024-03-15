@@ -5,9 +5,6 @@
 '''
 Game design truths:
 goals, rules, feedback, freedom, what the verb, and will it form a sentence 
-..
-
-
 
 '''
 import pygame as pg
@@ -49,6 +46,8 @@ class Game:
         # setting game clock 
         self.clock = pg.time.Clock()
         self.load_data()
+        self.running = True
+        self.paused = False
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
         self.game_folder = path.dirname(__file__)
@@ -143,7 +142,7 @@ class Game:
                     Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
-
+        self.run()
     def run(self):
         # start playing sound on infinite loop (loops=-1)
         pg.mixer.music.play(loops=-1)
@@ -159,10 +158,13 @@ class Game:
 
     def update(self):
         # tick the test timer
-        self.cooldown.ticking()
-        self.all_sprites.update()
-        if self.player.moneybag > 2:
-            self.change_level(LEVEL2)
+        if not self.paused:
+            self.cooldown.ticking()
+            self.all_sprites.update()
+            if self.player.hitpoints < 1:
+                self.playing = False
+            if self.player.moneybag > 2:
+                self.change_level(LEVEL2)
     
     def draw_grid(self):
          for x in range(0, WIDTH, TILESIZE):
@@ -185,7 +187,6 @@ class Game:
             # self.player.draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y, self.player.hitpoints)
             # draw the timer
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
-            self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             pg.display.flip()
@@ -195,6 +196,11 @@ class Game:
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYUP:
+                if event.key == pg.K_p:
+                    if not self.paused:
+                        self.paused = True
+                    else:
+                        self.paused = False
                 if event.key == pg.K_e:
                     self.player.weapon_drawn = False
             # if event.type == pg.KEYDOWN:
@@ -211,7 +217,14 @@ class Game:
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
-    
+    def show_go_screen(self):
+        if not self.running:
+            return
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "This is the GO screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
+
     def wait_for_key(self):
         waiting = True
         while waiting:
@@ -229,5 +242,5 @@ g = Game()
 g.show_start_screen()
 while True:
     g.new()
-    g.run()
-    # g.show_go_screen()
+    # g.run()
+    g.show_go_screen()
