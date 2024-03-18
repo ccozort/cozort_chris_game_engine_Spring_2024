@@ -3,6 +3,10 @@
 # import libraries and modules
 # my first source control edit
 '''
+Sources:
+Kids can code: https://github.com/kidscancode/pygame_tutorials/tree/master/tilemap/part%2001 
+'''
+'''
 Game design truths:
 goals, rules, feedback, freedom, what the verb, and will it form a sentence 
 

@@ -55,20 +55,25 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(0,0)
         self.dir = vec(0,0)
         self.material = True
+        self.weapon = ""
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
     def get_dir(self):
         return self.dir
     def get_mouse(self):
+        if pg.mouse.get_rel()[0]:
+            self.weapon_drawn = False
         if pg.mouse.get_pressed()[0]:
+            if not self.weapon_drawn:
+                self.weapon_drawn = True
+                self.game.sword_sound.play()
             mx = pg.mouse.get_pos()[0]
             my = pg.mouse.get_pos()[1]
             if abs(mx-self.rect.x) > abs(my-self.rect.y):
                 if mx-self.rect.x > 0:
                     print("swing to pos x")
-                    Sword(self.game, self.rect.x + self.rect.width, self.rect.y + self.rect.h/2, 32, 5)
-
+                    # self.weapon = Sword(self.rect.)
                 if mx-self.rect.x < 0:
                     print("swing to neg x")
             else:
@@ -76,10 +81,7 @@ class Player(pg.sprite.Sprite):
                     print("swing to pos y")
                 if my-self.rect.y < 0:
                     print("swing to neg y")
-                    
-            if not self.weapon_drawn:
-                self.weapon_drawn = True
-                self.game.sword_sound.play()
+            
         if pg.mouse.get_pressed()[1]:
             print("middle click")
         if pg.mouse.get_pressed()[2]:
@@ -222,20 +224,22 @@ class PewPew(pg.sprite.Sprite):
         # pass
 
 class Sword(pg.sprite.Sprite):
-    def __init__(self, game, x, y, w, h):
+    def __init__(self, game, x, y, w, h, dir):
         self.groups = game.all_sprites, game.weapons
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((w, h))
         self.image.fill(LIGHTBLUE)
         self.rect = self.image.get_rect()
-        self.rect.w = w
-        self.rect.h = h
+        self.dir = dir
+        self.w = w
+        self.h = h
         self.x = x
         self.y = y
         self.rect.x = x
         self.rect.y = y
-        self.dir = (0,0)
+        self.pos = vec(x,y)
+        
         self.speed = 10
         print("I created a sword")
     def collide_with_group(self, group, kill):
@@ -249,13 +253,9 @@ class Sword(pg.sprite.Sprite):
                 hits[0].hitpoints -= 1
 
     def update(self):
-        # self.collide_with_group(self.game.coins, True)
-        # if self.game.player.dir
-        self.rect.x = self.game.player.rect.x + self.game.player.dir[0]*32
-        self.rect.y = self.game.player.rect.y + self.game.player.dir[1]*32
-        self.rect.width = abs(self.game.player.dir[0]*32)+5
-        self.rect.width = abs(self.game.player.dir[1]*32)+5
-        self.image.get_rect()
+
+        self.pos = self.game.player.pos
+
         self.collide_with_group(self.game.mobs, False)
         if not self.game.player.weapon_drawn:
             self.kill()
@@ -305,10 +305,9 @@ class Mob(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.surface = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
-        self.pic = self.game.mob_img
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(RED)
+        self.image = self.game.mob_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
