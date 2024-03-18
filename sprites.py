@@ -158,7 +158,7 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
-                self.speed += 200
+                
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
                 self.game.collect_sound.play()
@@ -167,6 +167,7 @@ class Player(pg.sprite.Sprite):
                 self.cooling = True
                 # print(effect)
                 print(self.cooling)
+                self.speed += 200
                 if effect == "Invincible":
                     self.status = "Invincible"
             if str(hits[0].__class__.__name__) == "Mob":
