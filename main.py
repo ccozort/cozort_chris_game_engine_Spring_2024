@@ -58,6 +58,8 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'images')
         self.snd_folder = path.join(self.game_folder, 'sounds')
 
+        self.background_img = pg.image.load(path.join(self.img_folder, 'background.jpg')).convert_alpha()
+        self.background_rect = self.background_img.get_rect()
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
         self.mob2_img = pg.image.load(path.join(self.img_folder, 'dragon.png')).convert_alpha()
@@ -193,6 +195,7 @@ class Game:
     
     def draw(self):
             self.screen.fill(BGCOLOR)
+            self.screen.blit(self.background_img, self.background_rect)
             # self.draw_grid()
             self.all_sprites.draw(self.screen)
             # self.player.draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y, self.player.hitpoints)
