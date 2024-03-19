@@ -71,15 +71,18 @@ class Player(pg.sprite.Sprite):
                 if abs(pg.mouse.get_pos()[0]-self.rect.x) > abs(pg.mouse.get_pos()[1]-self.rect.y):
                     if pg.mouse.get_pos()[0]-self.rect.x > 0:
                         print("swing to pos x")
-                        self.weapon = Sword(self.game, self.rect.x+TILESIZE, self.rect.y, 16, 16, (1,0))
+                        self.weapon = Sword(self.game, self.rect.x+TILESIZE, self.rect.y, 32, 5, (1,0))
                     if pg.mouse.get_pos()[0]-self.rect.x < 0:
                         print("swing to neg x")
-                        self.weapon = Sword(self.game, self.rect.x-16, self.rect.y, 16, 16, (1,0))
+                        self.weapon = Sword(self.game, self.rect.x-TILESIZE, self.rect.y, 32, 5, (-1,0))
                 else:
                     if pg.mouse.get_pos()[1]-self.rect.y > 0:
                         print("swing to pos y")
+                        self.weapon = Sword(self.game, self.rect.x, self.rect.y+self.rect.height, 5, 32, (0,1))
                     if pg.mouse.get_pos()[1]-self.rect.y < 0:
                         print("swing to neg y")
+                        self.weapon = Sword(self.game, self.rect.x, self.rect.y-self.rect.height, 5, 32, (0,-1))
+
         if pg.mouse.get_pressed()[1]:
             print("middle click")
         if pg.mouse.get_pressed()[2]:
@@ -170,7 +173,7 @@ class Player(pg.sprite.Sprite):
                 if self.status == "Invincible":
                     print("you can't hurt me")
     def update(self):
-        self.get_mouse()
+        
         self.get_keys()
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
@@ -180,7 +183,8 @@ class Player(pg.sprite.Sprite):
         self.collide_with_walls('x')
         self.rect.y = self.y
         self.collide_with_walls('y')
-
+        # get mouse after x and y are set for player to place sword correctly
+        self.get_mouse()
         # added coin collection with a cooldown setting
         self.collide_with_group(self.game.coins, True)
         if self.game.cooldown.cd < 1:
@@ -243,10 +247,10 @@ class Sword(pg.sprite.Sprite):
                 print("you hurt a mob!")
                 hits[0].hitpoints -= 1
     def track(self, obj):
-        self.rect.x = obj.rect.x
-        self.rect.y = obj.rect.y
         self.vx = obj.vx
         self.vy = obj.vy
+        self.rect.width = obj.rect.x+self.dir[0]*32+5
+        self.rect.width = obj.rect.y*self.dir[1]*32+5
     def update(self):
         if self.game.player.weapon_drawn == False:
             self.kill()
