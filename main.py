@@ -58,7 +58,7 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'images')
         self.snd_folder = path.join(self.game_folder, 'sounds')
 
-        self.background_img = pg.image.load(path.join(self.img_folder, 'background.jpg')).convert_alpha()
+        self.background_img = pg.image.load(path.join(self.img_folder, 'background.png')).convert_alpha()
         self.background_rect = self.background_img.get_rect()
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
@@ -113,9 +113,9 @@ class Game:
     def new(self):
         self.load_data()
         # loading sound for use...not used yet
-        pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.mp3'))
+        pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.wav'))
         self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
-        self.sword_sound = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.mp3'))
+        self.sword_sound = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.wav'))
         # create timer
         
         self.cooldown = Timer(self)
@@ -130,7 +130,8 @@ class Game:
         self.weapons = pg.sprite.Group()
         self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
-
+        for i in range (0,10):
+            Coin(self, randint(0,32), randint(0,24))
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -143,8 +144,8 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'P':
                     self.player = Player(self, col, row)
-                if tile == 'C':
-                    Coin(self, col, row)
+                # if tile == 'C':
+                #     Coin(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
                 if tile == 'm':
@@ -217,8 +218,8 @@ class Game:
                         self.paused = True
                     else:
                         self.paused = False
-                if event.key == pg.K_e:
-                    self.player.weapon_drawn = False
+            if event.type ==pg.MOUSEBUTTONUP:
+                self.player.weapon_drawn = False
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:
             #         self.player.move(dx=-1)
