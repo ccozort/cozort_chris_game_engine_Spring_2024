@@ -1,3 +1,5 @@
+import pygame as pg
+
 WIDTH = 1024
 HEIGHT = 768
 
@@ -19,6 +21,8 @@ ORANGE = (255,140,0)
 PURPLE = (255,0,255)
 YELLOW = (255,255,0)
 LIGHTGREY = (75,75,75)
+
+MOB_HIT_RECT = pg.Rect(0,0,96,96)
 
 
 POWER_UP_EFFECTS = ["I can fly", "I'm invincible", "I'm bulletproof"]

@@ -8,25 +8,28 @@ from random import randint
 
 vec =pg.math.Vector2
 
+def collide_hit_rect(one, two):
+    return one.hit_rect.colliderect(two.rect)
+
 def collide_with_walls(sprite, group, dir):
     if dir == 'x':
-        hits = pg.sprite.spritecollide(sprite, group, False)
+        hits = pg.sprite.spritecollide(sprite, group, False, collide_hit_rect)
         if hits:
-            if hits[0].rect.centerx > sprite.rect.centerx:
-                sprite.pos.x = hits[0].rect.left - sprite.rect.width / 2
-            if hits[0].rect.centerx < sprite.rect.centerx:
-                sprite.pos.x = hits[0].rect.right + sprite.rect.width / 2
+            if hits[0].rect.centerx > sprite.hit_rect.centerx:
+                sprite.pos.x = hits[0].rect.left - sprite.hit_rect.width / 2
+            if hits[0].rect.centerx < sprite.hit_rect.centerx:
+                sprite.pos.x = hits[0].rect.right + sprite.hit_rect.width / 2
             sprite.vel.x = 0
-            sprite.rect.centerx = sprite.pos.x
+            sprite.hit_rect.centerx = sprite.pos.x
     if dir == 'y':
-        hits = pg.sprite.spritecollide(sprite, group, False)
+        hits = pg.sprite.spritecollide(sprite, group, False, collide_hit_rect)
         if hits:
-            if hits[0].rect.centery > sprite.rect.centery:
-                sprite.pos.y = hits[0].rect.top - sprite.rect.height / 2
+            if hits[0].rect.centery > sprite.hit_rect.centery:
+                sprite.pos.y = hits[0].rect.top - sprite.hit_rect.height / 2
             if hits[0].rect.centery < sprite.rect.centery:
-                sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
+                sprite.pos.y = hits[0].rect.bottom + sprite.hit_rect.height / 2
             sprite.vel.y = 0
-            sprite.rect.centery = sprite.pos.y
+            sprite.hit_rect.centery = sprite.pos.y
 class Test():
     def __init__(self):
         print("I can bring...")
@@ -316,7 +319,7 @@ class Mob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = randint(1,3)
-        self.hitpoints = 4
+        self.hitpoints = 5
         print("created mob at", self.rect.x, self.rect.y)
     def collide_with_walls(self, dir):
         if dir == 'x':
@@ -337,21 +340,20 @@ class Mob(pg.sprite.Sprite):
         # self.image.blit(self.game.screen, self.pic)
         # pass
         # # self.rect.x += 1
-        # self.x += self.vx * self.game.dt
-        # self.y += self.vy * self.game.dt
-        
-        # if self.rect.x < self.game.player.rect.x:
-        #     self.vx = 100
-        # if self.rect.x > self.game.player.rect.x:
-        #     self.vx = -100    
-        # if self.rect.y < self.game.player.rect.y:
-        #     self.vy = 100
-        # if self.rect.y > self.game.player.rect.y:
-        #     self.vy = -100
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
+        if self.rect.x < self.game.player.rect.x:
+            self.vx = 100
+        if self.rect.x > self.game.player.rect.x:
+            self.vx = -100    
+        if self.rect.y < self.game.player.rect.y:
+            self.vy = 100
+        if self.rect.y > self.game.player.rect.y:
+            self.vy = -100
         self.rect.x = self.x
-        # self.collide_with_walls('x')
+        self.collide_with_walls('x')
         self.rect.y = self.y
-        # self.collide_with_walls('y')
+        self.collide_with_walls('y')
 
 class Mob2(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -362,10 +364,10 @@ class Mob2(pg.sprite.Sprite):
         # self.image = pg.Surface((TILESIZE, TILESIZE))
         # self.image.fill(ORANGE)
         self.image = self.game.mob2_img
-        self.image.set_colorkey(BLACK)
+        # self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        # self.hit_rect = MOB_HIT_RECT.copy()
-        # self.hit_rect.center = self.rect.center
+        self.hit_rect = MOB_HIT_RECT.copy()
+        self.hit_rect.center = self.rect.center
         self.pos = vec(x, y) * TILESIZE
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
@@ -373,8 +375,8 @@ class Mob2(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         # added
-        self.speed = 150
-        self.chasing = False
+        self.speed = 100
+        self.chasing = True
         # self.health = MOB_HEALTH
         self.hitpoints = 5
     def sensor(self):
@@ -383,26 +385,23 @@ class Mob2(pg.sprite.Sprite):
         else:
             self.chasing = False
     def update(self):
-        if self.hitpoints < 1:
-            print("mob2 should be dead")
+        if self.hitpoints <= 0:
             self.kill()
-        self.sensor()
+        # self.sensor()
         if self.chasing:
             self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
-            # self.image = pg.transform.rotate(self.image, 45)
-            # self.rect = self.image.get_rect()
+            self.image = pg.transform.rotate(self.game.mob2_img, self.rot)
+            self.rect = self.image.get_rect()
             self.rect.center = self.pos
             self.acc = vec(self.speed, 0).rotate(-self.rot)
-            self.acc += self.vel * 2
+            self.acc += self.vel * -1
             self.vel += self.acc * self.game.dt
             # equation of motion
             self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-            # self.hit_rect.centerx = self.pos.x
-            self.rect.centerx = self.pos.x
+            # hit_rect used to account for adjusting the square collision when image rotates
+            self.hit_rect.centerx = self.pos.x
             collide_with_walls(self, self.game.walls, 'x')
-            # self.hit_rect.centery = self.pos.y
-            self.rect.centery = self.pos.y
+            self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
-            # self.rect.center = self.hit_rect.center
-            # if self.health <= 0:
-            #     self.kill()
+            self.rect.center = self.hit_rect.center
+        

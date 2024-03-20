@@ -195,6 +195,7 @@ class Game:
         surface.blit(text_surface, text_rect)
     
     def draw(self):
+            pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
             self.screen.fill(BGCOLOR)
             self.screen.blit(self.background_img, self.background_rect)
             # self.draw_grid()
@@ -205,6 +206,8 @@ class Game:
             self.draw_text(self.screen, str(self.mob_timer.get_countdown()), 24, WHITE, WIDTH/2 - 32, 60)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
+            for m in self.mobs:
+                draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
             pg.display.flip()
 
     def events(self):
