@@ -57,7 +57,6 @@ class Game:
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
         self.snd_folder = path.join(self.game_folder, 'sounds')
-
         self.background_img = pg.image.load(path.join(self.img_folder, 'background.png')).convert_alpha()
         self.background_rect = self.background_img.get_rect()
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
@@ -112,16 +111,16 @@ class Game:
     # Create run method which runs the whole GAME
     def new(self):
         self.load_data()
+        pg.time.set_timer(pg.USEREVENT, 599)
         # loading sound for use...not used yet
         pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.wav'))
         self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
         self.sword_sound = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.wav'))
         # create timer
-        
+        self.countdown_time = 35
         self.cooldown = Timer(self)
         self.mob_timer = Timer(self)
         self.mob_timer.cd = 5
-        self.testclass = Test()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -203,8 +202,9 @@ class Game:
             # self.player.draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y, self.player.hitpoints)
             # draw the timer
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
-            self.draw_text(self.screen, str(self.mob_timer.get_countdown()), 24, WHITE, WIDTH/2 - 32, 60)
-            self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
+            self.draw_text(self.screen, str(self.mob_timer.get_countdown()), 24, WHITE, WIDTH/2 - 32, 32)
+            self.draw_text(self.screen, str(self.dt), 24, WHITE, WIDTH/2 - 32, 54)
+            self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 128)
             draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             for m in self.mobs:
                 draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)

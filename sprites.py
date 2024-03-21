@@ -7,34 +7,24 @@ from random import choice
 from random import randint
 
 vec =pg.math.Vector2
+'''
+pygame.sprite.spritecollide()
+Find sprites in a group that intersect another sprite.
+spritecollide(sprite, group, dokill, collided = None) -> Sprite_list
+Return a list containing all Sprites in a Group that intersect with another Sprite. Intersection is determined by comparing the Sprite.rect attribute of each Sprite.
 
-def collide_hit_rect(one, two):
-    return one.hit_rect.colliderect(two.rect)
+The dokill argument is a bool. If set to True, all Sprites that collide will be removed from the Group.
 
-def collide_with_walls(sprite, group, dir):
-    if dir == 'x':
-        hits = pg.sprite.spritecollide(sprite, group, False, collide_hit_rect)
-        if hits:
-            if hits[0].rect.centerx > sprite.hit_rect.centerx:
-                sprite.pos.x = hits[0].rect.left - sprite.hit_rect.width / 2
-            if hits[0].rect.centerx < sprite.hit_rect.centerx:
-                sprite.pos.x = hits[0].rect.right + sprite.hit_rect.width / 2
-            sprite.vel.x = 0
-            sprite.hit_rect.centerx = sprite.pos.x
-    if dir == 'y':
-        hits = pg.sprite.spritecollide(sprite, group, False, collide_hit_rect)
-        if hits:
-            if hits[0].rect.centery > sprite.hit_rect.centery:
-                sprite.pos.y = hits[0].rect.top - sprite.hit_rect.height / 2
-            if hits[0].rect.centery < sprite.rect.centery:
-                sprite.pos.y = hits[0].rect.bottom + sprite.hit_rect.height / 2
-            sprite.vel.y = 0
-            sprite.hit_rect.centery = sprite.pos.y
-class Test():
-    def __init__(self):
-        print("I can bring...")
+The collided argument is a callback function used to calculate if two sprites are colliding. it should take two sprites as values, and return a bool value indicating if they are colliding. If collided is not passed, all sprites must have a "rect" value, which is a rectangle of the sprite area, which will be used to calculate the collision.
 
-        
+
+
+# function that checks between a hit_rect rect value to bypass the default spritecollide check for collision, 
+which uses the rect values of the first two arguments by default
+
+'''
+
+       
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -59,7 +49,8 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(0,0)
         self.dir = vec(0,0)
         self.material = True
-        self.weapon = Sword(self.game, self.rect.x, self.rect.y, 16, 16, (0,0))
+        self.weapon_type = ""
+        self.weapon = Weapon(self.game, self.weapon_type,self.rect.x, self.rect.y, 16, 16, (0,0))
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
@@ -67,24 +58,26 @@ class Player(pg.sprite.Sprite):
         return self.dir
     def get_mouse(self):
         if pg.mouse.get_pressed()[0]:
+            self.weapon = Weapon(self.game, self.weapon_type, self.rect.x+TILESIZE*self.dir[0], self.rect.y+TILESIZE*self.dir[1], abs(self.dir[0]*32+5), abs(self.dir[1]*32+5), self.dir)
+
             # mx = pg.mouse.get_pos()[0]
             # my = pg.mouse.get_pos()[1]
-            if self.weapon_drawn == False:
-                self.weapon_drawn = True
-                if abs(pg.mouse.get_pos()[0]-self.rect.x) > abs(pg.mouse.get_pos()[1]-self.rect.y):
-                    if pg.mouse.get_pos()[0]-self.rect.x > 0:
-                        print("swing to pos x")
-                        self.weapon = Sword(self.game, self.rect.x+TILESIZE, self.rect.y, 32, 5, (1,0))
-                    if pg.mouse.get_pos()[0]-self.rect.x < 0:
-                        print("swing to neg x")
-                        self.weapon = Sword(self.game, self.rect.x-TILESIZE, self.rect.y, 32, 5, (-1,0))
-                else:
-                    if pg.mouse.get_pos()[1]-self.rect.y > 0:
-                        print("swing to pos y")
-                        self.weapon = Sword(self.game, self.rect.x, self.rect.y+self.rect.height, 5, 32, (0,1))
-                    if pg.mouse.get_pos()[1]-self.rect.y < 0:
-                        print("swing to neg y")
-                        self.weapon = Sword(self.game, self.rect.x, self.rect.y-self.rect.height, 5, 32, (0,-1))
+            # if self.weapon_drawn == False:
+            #     self.weapon_drawn = True
+            #     if abs(pg.mouse.get_pos()[0]-self.rect.x) > abs(pg.mouse.get_pos()[1]-self.rect.y):
+            #         if pg.mouse.get_pos()[0]-self.rect.x > 0:
+            #             print("swing to pos x")
+            #             self.weapon = Weapon(self.game, 'sword', self.rect.x+TILESIZE, self.rect.y, 32, 5, (1,0))
+            #         if pg.mouse.get_pos()[0]-self.rect.x < 0:
+            #             print("swing to neg x")
+            #             self.weapon = Weapon(self.game, 'sword', self.rect.x-TILESIZE, self.rect.y, 32, 5, (-1,0))
+            #     else:
+            #         if pg.mouse.get_pos()[1]-self.rect.y > 0:
+            #             print("swing to pos y")
+            #             self.weapon = Weapon(self.game, 'sword', self.rect.x, self.rect.y+self.rect.height, 5, 32, (0,1))
+            #         if pg.mouse.get_pos()[1]-self.rect.y < 0:
+            #             print("swing to neg y")
+            #             self.weapon = Weapon(self.game, 'sword', self.rect.x, self.rect.y-self.rect.height, 5, 32, (0,-1))
 
         if pg.mouse.get_pressed()[1]:
             print("middle click")
@@ -96,9 +89,9 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
          
         if keys[pg.K_t]:
-            # for a in self.game.mobs:
-            #     a.kill()
             self.game.change_level("level3.txt")
+        if keys[pg.K_e]:
+            self.weapon = Weapon(self.game, self.weapon_type, self.rect.x+TILESIZE*self.dir[0], self.rect.y+TILESIZE*self.dir[1], abs(self.dir[0]*32+5), abs(self.dir[1]*32+5), self.dir)
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
             self.set_dir((-1,0))
@@ -209,6 +202,7 @@ class PewPew(pg.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.speed = 10
+        self.dir = self.game.player.dir
         print("I created a pew pew...")
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -216,12 +210,13 @@ class PewPew(pg.sprite.Sprite):
         #     if str(hits[0].__class__.__name__) == "Coin":
         #         self.moneybag += 1
     def update(self):
-        self.collide_with_group(self.game.coins, True)
-        self.rect.y -= self.speed
+        self.collide_with_group(self.game.mobs, True)
+        self.rect.x += self.dir[0]*self.speed
+        self.rect.y += self.dir[1]*self.speed
         # pass
 
-class Sword(pg.sprite.Sprite):
-    def __init__(self, game, x, y, w, h, dir):
+class Weapon(pg.sprite.Sprite):
+    def __init__(self, game, typ, x, y, w, h, dir):
         self.groups = game.all_sprites, game.weapons
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -239,6 +234,7 @@ class Sword(pg.sprite.Sprite):
         self.rect.height = h
         self.pos = vec(x,y)
         self.dir = dir
+        self.typ = typ
         print("I created a sword")
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -249,11 +245,14 @@ class Sword(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Mob2":
                 print("you hurt a mob!")
                 hits[0].hitpoints -= 1
+            if str(hits[0].__class__.__name__) == "Wall":
+                print("you hit a wall")
+                
     def track(self, obj):
         self.vx = obj.vx
         self.vy = obj.vy
-        self.rect.width = obj.rect.x+self.dir[0]*32+5
-        self.rect.width = obj.rect.y*self.dir[1]*32+5
+        # self.rect.width = obj.rect.x+self.dir[0]*32+5
+        # self.rect.width = obj.rect.y*self.dir[1]*32+5
     def update(self):
         if self.game.player.weapon_drawn == False:
             self.kill()
@@ -263,6 +262,10 @@ class Sword(pg.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
         self.collide_with_group(self.game.mobs, False)
+        self.collide_with_group(self.game.walls, True)
+        # hits = pg.sprite.spritecollide(self, self.game.mobs, False)
+        # if hits:
+        #     hits[0].hitpoints -= 1
 
 
 class Wall(pg.sprite.Sprite):
@@ -334,14 +337,7 @@ class Mob(pg.sprite.Sprite):
             if hits:
                 self.vy *= -1
                 self.rect.y = self.y
-    def update(self):
-        if self.hitpoints < 1:
-            self.kill()
-        # self.image.blit(self.game.screen, self.pic)
-        # pass
-        # # self.rect.x += 1
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
+    def chasing(self):
         if self.rect.x < self.game.player.rect.x:
             self.vx = 100
         if self.rect.x > self.game.player.rect.x:
@@ -350,6 +346,15 @@ class Mob(pg.sprite.Sprite):
             self.vy = 100
         if self.rect.y > self.game.player.rect.y:
             self.vy = -100
+    def update(self):
+        if self.hitpoints < 1:
+            self.kill()
+        # self.image.blit(self.game.screen, self.pic)
+        # pass
+        # # self.rect.x += 1
+        # self.chasing()
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
         self.rect.x = self.x
         self.collide_with_walls('x')
         self.rect.y = self.y
@@ -378,7 +383,7 @@ class Mob2(pg.sprite.Sprite):
         self.speed = 100
         self.chasing = True
         # self.health = MOB_HEALTH
-        self.hitpoints = 5
+        self.hitpoints = 100
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
             self.chasing = True
