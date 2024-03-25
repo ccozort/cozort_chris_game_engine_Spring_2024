@@ -5,6 +5,7 @@ from settings import *
 from utils import *
 from random import choice
 from random import randint
+from os import path
 
 vec =pg.math.Vector2
 '''
@@ -24,6 +25,10 @@ which uses the rect values of the first two arguments by default
 
 '''
 
+game_folder = path.dirname(__file__)
+img_folder = path.join(game_folder, 'images')
+
+
        
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -33,7 +38,10 @@ class Player(pg.sprite.Sprite):
         self.game = game
         # self.image = pg.Surface((TILESIZE, TILESIZE))
         # added player image to sprite from the game class...
+        self.spritesheet = Spritesheet(path.join(img_folder, 'theBell.png'))
+        self.load_images()
         self.image = game.player_img
+
         # self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
@@ -168,6 +176,20 @@ class Player(pg.sprite.Sprite):
                 self.hitpoints -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
+    
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+        for frame in self.standing_frames:
+            frame.set_colorkey(BLACK)
+
+        # add other frame sets for different poses etc.
+            
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 350:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
     def update(self):
         
         self.get_keys()
@@ -352,7 +374,7 @@ class Mob(pg.sprite.Sprite):
         # self.image.blit(self.game.screen, self.pic)
         # pass
         # # self.rect.x += 1
-        # self.chasing()
+        self.chasing()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x

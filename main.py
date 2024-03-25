@@ -111,7 +111,6 @@ class Game:
     # Create run method which runs the whole GAME
     def new(self):
         self.load_data()
-        pg.time.set_timer(pg.USEREVENT, 599)
         # loading sound for use...not used yet
         pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.wav'))
         self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
@@ -238,8 +237,8 @@ class Game:
         pg.display.flip()
         self.wait_for_key()
     def show_go_screen(self):
-        if not self.running:
-            return
+        # if not self.running:
+        #     return
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "This is the GO screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
