@@ -27,8 +27,6 @@ which uses the rect values of the first two arguments by default
 
 game_folder = path.dirname(__file__)
 img_folder = path.join(game_folder, 'images')
-
-
        
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -36,13 +34,13 @@ class Player(pg.sprite.Sprite):
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = pg.Surface((TILESIZE, TILESIZE))
         # added player image to sprite from the game class...
-        self.spritesheet = Spritesheet(path.join(img_folder, 'theBell.png'))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'autobot_two_frames.png'))
         self.load_images()
-        self.image = game.player_img
-
+        # self.image = game.player_img
         # self.image.fill(GREEN)
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
@@ -56,6 +54,8 @@ class Player(pg.sprite.Sprite):
         self.weapon_dir = (0,0)
         self.pos = vec(0,0)
         self.dir = vec(0,0)
+        self.current_frame = 0
+        self.last_update = 0
         self.material = True
         self.weapon_type = ""
         self.weapon = Weapon(self.game, self.weapon_type,self.rect.x, self.rect.y, 16, 16, (0,0))
@@ -180,8 +180,8 @@ class Player(pg.sprite.Sprite):
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
                                 self.spritesheet.get_image(32,0, 32, 32)]
-        for frame in self.standing_frames:
-            frame.set_colorkey(BLACK)
+        # for frame in self.standing_frames:
+        #     frame.set_colorkey(BLACK)
 
         # add other frame sets for different poses etc.
             
@@ -190,8 +190,12 @@ class Player(pg.sprite.Sprite):
         if now - self.last_update > 350:
             self.last_update = now
             self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
+            bottom = self.rect.bottom
+            self.image = self.standing_frames[self.current_frame]
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom
     def update(self):
-        
+        self.animate()
         self.get_keys()
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
