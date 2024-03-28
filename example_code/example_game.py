@@ -319,7 +319,7 @@ class Mob(Sprite):
                 p = Pewpew(self.rect.x, self.rect.y, 5, 15, 0, 5, 'enemy')
                 all_sprites.add(p)
                 enemyPewpews.add(p)
-
+part_counter = 0
 class Particle(Sprite):
     def __init__(self, x, y, w, h):
         Sprite.__init__(self)
@@ -333,10 +333,13 @@ class Particle(Sprite):
         self.countdown = Cooldown()
         self.countdown.event_time = floor(pg.time.get_ticks()/1000)
         print('created a particle')
+        print(len(particles))
     def update(self):
         self.countdown.ticking()
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy+PLAYER_GRAV
+        self.rect.x += self.speedx*game_delta/.2
+        self.rect.y += self.speedy*PLAYER_GRAV*game_delta/.2
+        # self.rect.x += self.speedx*game_delta/.2
+        # self.rect.y += self.speedy*PLAYER_GRAV*game_delta/.2
         if self.countdown.delta > 1:
             print('time to die...')
             self.kill()
@@ -390,10 +393,10 @@ all_plats.add(plat, plat2, ground)
 ############################# Game loop ###########################################
 # starts timer...
 start_ticks = pg.time.get_ticks()
-
+game_delta = 0
 running = True
 while running:
-    delta = clock.tick(FPS)
+    game_delta = clock.tick(FPS) / 1000
     # print(clock.get_time())
     # keep the loop running using clock
     hits = pg.sprite.spritecollide(player, all_plats, False)
@@ -422,12 +425,14 @@ while running:
                 print(phit[0])
                 particle = Particle(phit[0].rect.x, phit[0].rect.y, randint(5,10), randint(5,12))
                 all_sprites.add(particle)
+                particles.add(particle)
                 phit[0].kill()
         playerhit = pg.sprite.spritecollide(player, enemyPewpews, True)
         if playerhit:
             for i in range(3):
                 particle = Particle(playerhit[0].rect.x, playerhit[0].rect.y, randint(1,3), randint(1,3))
                 all_sprites.add(particle)
+                particles.add(particle)
             print('the player has been hit')
             player.health -= 1
 
@@ -507,7 +512,7 @@ while running:
 
 
     # draw text
-    draw_text("FPS: " + str(delta), 22, RED, 64, HEIGHT / 24)
+    draw_text("FPS: " + str(game_delta), 22, RED, 64, HEIGHT / 24)
     # draw_text("Timer: " + str(seconds), 22, RED, 64, HEIGHT / 10)
     draw_text("SCORE: " + str(SCORE), 22, WHITE, WIDTH / 2, HEIGHT / 24)
     # draw_text("HEALTH: " + str(player.health), 22, WHITE, WIDTH / 2, HEIGHT / 10)

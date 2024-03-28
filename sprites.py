@@ -7,6 +7,8 @@ from random import choice
 from random import randint
 from os import path
 
+rot = 7
+
 vec =pg.math.Vector2
 '''
 pygame.sprite.spritecollide()
@@ -59,6 +61,7 @@ class Player(pg.sprite.Sprite):
         self.material = True
         self.weapon_type = ""
         self.weapon = Weapon(self.game, self.weapon_type,self.rect.x, self.rect.y, 16, 16, (0,0))
+        self.points = 0
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
@@ -162,6 +165,7 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+                self.points += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
                 print(hits[0].__class__.__name__)
                 # self.game.collect_sound.play()
@@ -198,8 +202,8 @@ class Player(pg.sprite.Sprite):
         self.animate()
         self.get_keys()
         # self.power_up_cd.ticking()
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
+        self.x += self.vx * self.game.dt/rot
+        self.y += self.vy * self.game.dt/rot
         # this order of operations for rect settings and collision is imperative
         self.rect.x = self.x
         self.collide_with_walls('x')
@@ -379,8 +383,8 @@ class Mob(pg.sprite.Sprite):
         # pass
         # # self.rect.x += 1
         self.chasing()
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
+        self.x += self.vx * self.game.dt/rot
+        self.y += self.vy * self.game.dt/rot
         self.rect.x = self.x
         self.collide_with_walls('x')
         self.rect.y = self.y
