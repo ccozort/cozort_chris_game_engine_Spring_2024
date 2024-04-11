@@ -62,6 +62,7 @@ class Player(pg.sprite.Sprite):
         self.weapon_type = ""
         self.weapon = Weapon(self.game, self.weapon_type,self.rect.x, self.rect.y, 16, 16, (0,0))
         self.points = 0
+        self.can_collide = False
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
@@ -202,13 +203,15 @@ class Player(pg.sprite.Sprite):
         self.animate()
         self.get_keys()
         # self.power_up_cd.ticking()
-        self.x += self.vx * self.game.dt/rot
-        self.y += self.vy * self.game.dt/rot
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
         # this order of operations for rect settings and collision is imperative
         self.rect.x = self.x
-        self.collide_with_walls('x')
+        if self.can_collide == True:
+            self.collide_with_walls('x')
         self.rect.y = self.y
-        self.collide_with_walls('y')
+        if self.can_collide == True:
+            self.collide_with_walls('y')
         # get mouse after x and y are set for player to place sword correctly
         self.get_mouse()
         # added coin collection with a cooldown setting

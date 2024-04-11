@@ -205,6 +205,7 @@ class Game:
             self.draw_text(self.screen, str(self.dt), 24, WHITE, WIDTH/2 - 32, 54)
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 128)
             self.draw_text(self.screen, str(self.player.points), 24, RED, WIDTH/4 - 32, 128)
+            self.draw_text(self.screen, "New line...", 24, RED, WIDTH/4 - 32, 256)
             draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             for m in self.mobs:
                 draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
