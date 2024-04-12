@@ -31,7 +31,7 @@ class Spritesheet:
         image = pg.transform.scale(image, (width * 4, height * 4))
         return image
     
-
+# this is the player class
 class Animated_sprite(Sprite):
     def __init__(self):
         Sprite.__init__(self)

@@ -7,28 +7,27 @@ from random import choice
 from random import randint
 from os import path
 
-rot = 7
 
 vec =pg.math.Vector2
-'''
-pygame.sprite.spritecollide()
-Find sprites in a group that intersect another sprite.
-spritecollide(sprite, group, dokill, collided = None) -> Sprite_list
-Return a list containing all Sprites in a Group that intersect with another Sprite. Intersection is determined by comparing the Sprite.rect attribute of each Sprite.
 
-The dokill argument is a bool. If set to True, all Sprites that collide will be removed from the Group.
-
-The collided argument is a callback function used to calculate if two sprites are colliding. it should take two sprites as values, and return a bool value indicating if they are colliding. If collided is not passed, all sprites must have a "rect" value, which is a rectangle of the sprite area, which will be used to calculate the collision.
-
-
-
-# function that checks between a hit_rect rect value to bypass the default spritecollide check for collision, 
-which uses the rect values of the first two arguments by default
-
-'''
-
+# needed for animated sprite
+SPRITESHEET = "theBell.png"
+# needed for animated sprite
 game_folder = path.dirname(__file__)
 img_folder = path.join(game_folder, 'images')
+# needed for animated sprite
+class Spritesheet:
+    # utility class for loading and parsing spritesheets
+    def __init__(self, filename):
+        self.spritesheet = pg.image.load(filename).convert()
+
+    def get_image(self, x, y, width, height):
+        # grab an image out of a larger spritesheet
+        image = pg.Surface((width, height))
+        image.blit(self.spritesheet, (0, 0), (x, y, width, height))
+        # image = pg.transform.scale(image, (width, height))
+        image = pg.transform.scale(image, (width * 1, height * 1))
+        return image
        
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -38,10 +37,13 @@ class Player(pg.sprite.Sprite):
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         # added player image to sprite from the game class...
-        self.spritesheet = Spritesheet(path.join(img_folder, 'autobot_two_frames.png'))
+        # needed for animated sprite
+        self.spritesheet = Spritesheet(path.join(img_folder, SPRITESHEET))
+        # needed for animated sprite
         self.load_images()
         # self.image = game.player_img
         # self.image.fill(GREEN)
+        # needed for animated sprite
         self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
@@ -56,13 +58,19 @@ class Player(pg.sprite.Sprite):
         self.weapon_dir = (0,0)
         self.pos = vec(0,0)
         self.dir = vec(0,0)
+        # needed for animated sprite
         self.current_frame = 0
+        # needed for animated sprite
         self.last_update = 0
         self.material = True
+        # needed for animated sprite
+        self.jumping = False
+        # needed for animated sprite
+        self.walking = False
         self.weapon_type = ""
         self.weapon = Weapon(self.game, self.weapon_type,self.rect.x, self.rect.y, 16, 16, (0,0))
         self.points = 0
-        self.can_collide = False
+        self.can_collide = True
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
@@ -107,6 +115,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
             self.set_dir((-1,0))
+            
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed
             self.set_dir((1,0))
@@ -181,7 +190,7 @@ class Player(pg.sprite.Sprite):
                 self.hitpoints -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
-    
+    # needed for animated sprite
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
                                 self.spritesheet.get_image(32,0, 32, 32)]
@@ -189,7 +198,7 @@ class Player(pg.sprite.Sprite):
         #     frame.set_colorkey(BLACK)
 
         # add other frame sets for different poses etc.
-            
+    # needed for animated sprite        
     def animate(self):
         now = pg.time.get_ticks()
         if now - self.last_update > 350:
@@ -200,6 +209,7 @@ class Player(pg.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
     def update(self):
+        # needed for animated sprite
         self.animate()
         self.get_keys()
         # self.power_up_cd.ticking()
@@ -386,8 +396,8 @@ class Mob(pg.sprite.Sprite):
         # pass
         # # self.rect.x += 1
         self.chasing()
-        self.x += self.vx * self.game.dt/rot
-        self.y += self.vy * self.game.dt/rot
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
         self.rect.x = self.x
         self.collide_with_walls('x')
         self.rect.y = self.y
