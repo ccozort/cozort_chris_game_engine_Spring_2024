@@ -10,11 +10,23 @@ Kids can code: https://github.com/kidscancode/pygame_tutorials/tree/master/tilem
 Game design truths:
 goals, rules, feedback, freedom, what the verb, and will it form a sentence 
 
+BETA Goals:
+*Cleanup graphics
+
+Gameplay goal: add weapon power-ups
+
+Secondary goal: add sprite graphics for all elements
+
+Release version:
+Jumping - requires sprite scale and collision detection so that player can stand on walls.
+May require adjusting sprite images
+
 '''
 import pygame as pg
 from settings import *
 from sprites import *
 from utils import *
+from tilemap import *
 from random import randint
 import sys
 from os import path
@@ -26,16 +38,7 @@ from math import floor
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 
-def draw_health_bar(surf, x, y, pct):
-    if pct < 0:
-        pct = 0
-    BAR_LENGTH = 32
-    BAR_HEIGHT = 10
-    fill = (pct / 100) * BAR_LENGTH
-    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
-    pg.draw.rect(surf, GREEN, fill_rect)
-    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
 
 # Define game class...
 class Game:
@@ -57,24 +60,22 @@ class Game:
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
         self.snd_folder = path.join(self.game_folder, 'sounds')
+        self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
+        self.map = Map(path.join(game_folder, 'level4.txt'))
         self.background_img = pg.image.load(path.join(self.img_folder, 'background.png')).convert_alpha()
         self.background_rect = self.background_img.get_rect()
-        self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
         self.mob2_img = pg.image.load(path.join(self.img_folder, 'dragon.png')).convert_alpha()
-        self.map_data = []
+        # self.map_data = []
         '''
         The with statement is a context manager in Python. 
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
-            for line in f:
-                print(line)
-                self.map_data.append(line)
-
-    def test_method(self):
-        print("I can be called from Sprites...")
+        # with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
+        #     for line in f:
+        #         print(line)
+        #         self.map_data.append(line)
     # added level change method
     def change_level(self, lvl):
         # kill all existing sprites first to save memory
@@ -90,7 +91,7 @@ class Game:
                 print(line)
                 self.map_data.append(line)
         # repopulate the level with stuff
-        for row, tiles in enumerate(self.map_data):
+        for row, tiles in enumerate(self.map.data):
             print(row)
             for col, tile in enumerate(tiles):
                 print(col)
@@ -107,6 +108,7 @@ class Game:
                     Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
+                   
 
     # Create run method which runs the whole GAME
     def new(self):
@@ -133,7 +135,7 @@ class Game:
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
-        for row, tiles in enumerate(self.map_data):
+        for row, tiles in enumerate(self.map.data):
             print(row)
             for col, tile in enumerate(tiles):
                 print(col)
@@ -142,6 +144,7 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'P':
                     self.player = Player(self, col, row)
+                    print("player created")
                 # if tile == 'C':
                 #     Coin(self, col, row)
                 if tile == 'M':
@@ -150,7 +153,7 @@ class Game:
                     Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
-        self.run()
+        self.camera = Camera(self.map.width, self.map.height)
     def run(self):
         # start playing sound on infinite loop (loops=-1)
         pg.mixer.music.play(loops=-1)
@@ -167,9 +170,11 @@ class Game:
     def update(self):
         # tick the test timer
         if not self.paused:
+            
             self.cooldown.ticking()
             self.mob_timer.ticking()
             self.all_sprites.update()
+            self.camera.update(self.player)
             if self.player.hitpoints < 1:
                 self.playing = False
             if self.player.moneybag > 2:
@@ -195,9 +200,13 @@ class Game:
     def draw(self):
             pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
             self.screen.fill(BGCOLOR)
-            self.screen.blit(self.background_img, self.background_rect)
+            # self.screen.blit(self.background_img, self.backgdround_rect)
             # self.draw_grid()
-            self.all_sprites.draw(self.screen)
+            for sprite in self.all_sprites:
+                if isinstance(sprite, Mob):
+                    sprite.draw_health()
+                self.screen.blit(sprite.image, self.camera.apply(sprite))
+            # self.all_sprites.draw(self.screen)
             # self.player.draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y, self.player.hitpoints)
             # draw the timer
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
@@ -206,9 +215,9 @@ class Game:
             self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 128)
             self.draw_text(self.screen, str(self.player.points), 24, RED, WIDTH/4 - 32, 128)
             self.draw_text(self.screen, "New line...", 24, RED, WIDTH/4 - 32, 256)
-            draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
-            for m in self.mobs:
-                draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
+            # draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
+            # for m in self.mobs:
+            #     draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
             pg.display.flip()
 
     def events(self):
@@ -264,5 +273,5 @@ g = Game()
 g.show_start_screen()
 while True:
     g.new()
-    # g.run()
+    g.run()
     g.show_go_screen()

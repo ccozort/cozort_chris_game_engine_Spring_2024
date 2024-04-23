@@ -1,34 +1,26 @@
-# This file was created by: Chris Cozort
+import pygame
 
-print("hello world!")
+# Initialize Pygame
+pygame.init()
 
+# Set up the display surface
+screen = pygame.display.set_mode((800, 600))
 
-x = "awesome"
+# Load an image
+image = pygame.image.load('path_to_image.png')
 
-def myFunc():
-    x  = "fantastic"
-    print("Python is " + x)
-
-myFunc()
-
-print("Python is " + x)
-
-
-mystr = "Hello there"
-
-for i in range(0,3):
-    print(mystr[i])
-
-
-base = 16
-
-
-print(base**2)
-
-i = 1
-
-
-while i < 6:
+# The main loop of the game
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
     
-    i += 1
-    print(i)
+    # Draw the image onto the display surface
+    screen.blit(image, (50, 50))  # Blit the image at coordinates (50, 50)
+
+    # Update the display
+    pygame.display.flip()
+
+# Quit Pygame
+pygame.quit()

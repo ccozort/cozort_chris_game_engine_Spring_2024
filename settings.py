@@ -23,6 +23,7 @@ YELLOW = (255,255,0)
 LIGHTGREY = (75,75,75)
 
 MOB_HIT_RECT = pg.Rect(0,0,96,96)
+MOB_HITPOINTS = 32
 
 
 POWER_UP_EFFECTS = ["I can fly", "I'm invincible", "I'm bulletproof"]

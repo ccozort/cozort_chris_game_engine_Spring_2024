@@ -28,19 +28,51 @@ class Spritesheet:
         # image = pg.transform.scale(image, (width, height))
         image = pg.transform.scale(image, (width * 1, height * 1))
         return image
-       
+
+def draw_health_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 32
+    BAR_HEIGHT = 10
+    fill = (pct / 100) * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, GREEN, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+class HealthBar(pg.sprite.Sprite):
+    def __init__(self, game, x, y, w, h, target, pct):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.w = w
+        self.h = h
+        self.image = pg.Surface((w, h))
+        self.rect = self.image.get_rect()
+        self.image.fill(GREEN)
+        self.rect.x = x
+        self.rect.y = y
+        self.target = target
+        self.pct = pct
+    def update(self):
+        self.rect.x = self.target.rect.x
+        self.rect.y = self.target.rect.y
+
+
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
         # added player image to sprite from the game class...
         # needed for animated sprite
         self.spritesheet = Spritesheet(path.join(img_folder, SPRITESHEET))
         # needed for animated sprite
         self.load_images()
+        
         # self.image = game.player_img
         # self.image.fill(GREEN)
         # needed for animated sprite
@@ -53,6 +85,8 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.status = ""
         self.hitpoints = 100
+        self.hitpoints = 100
+        self.healthbar = HealthBar(self.game, self.rect.x, self.rect.y, self.rect.w, 5, self, self.hitpoints)
         self.cooling = False
         self.weapon_drawn = False
         self.weapon_dir = (0,0)
@@ -102,9 +136,9 @@ class Player(pg.sprite.Sprite):
         if pg.mouse.get_pressed()[1]:
             print("middle click")
         if pg.mouse.get_pressed()[2]:
-            print("right click")
-            
+            print("right click")         
     def get_keys(self):
+        self.walking = False
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
          
@@ -115,10 +149,12 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
             self.set_dir((-1,0))
+            self.walking = True
             
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed
             self.set_dir((1,0))
+            self.walking = True
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.vy = -self.speed
             self.set_dir((0,-1))
@@ -130,13 +166,11 @@ class Player(pg.sprite.Sprite):
             self.pew()
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
-            self.vy *= 0.7071
-
+            self.vy *= 0.7071      
     def pew(self):
         p = PewPew(self.game, self.rect.x, self.rect.y)
         print(p.rect.x)
         print(p.rect.y)
-
     # def move(self, dx=0, dy=0):
     #     if not self.collide_with_walls(dx, dy):
     #         self.x += dx
@@ -168,7 +202,6 @@ class Player(pg.sprite.Sprite):
                         self.y = hits[0].rect.bottom
                     self.vy = 0
                     self.rect.y = self.y
-    
     # made possible by Aayush's question!
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -188,12 +221,19 @@ class Player(pg.sprite.Sprite):
                     self.status = "Invincible"
             if str(hits[0].__class__.__name__) == "Mob":
                 self.hitpoints -= 1
+                hits[0].hitpoints -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
     # needed for animated sprite
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
-                                self.spritesheet.get_image(32,0, 32, 32)]
+                                self.spritesheet.get_image(32,0, 32, 32),
+
+                                ]
+        self.walking_frames = [
+                                self.spritesheet.get_image(64,0, 32, 32),
+                                self.spritesheet.get_image(96,0, 32, 32),
+                                ]
         # for frame in self.standing_frames:
         #     frame.set_colorkey(BLACK)
 
@@ -205,7 +245,10 @@ class Player(pg.sprite.Sprite):
             self.last_update = now
             self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
             bottom = self.rect.bottom
-            self.image = self.standing_frames[self.current_frame]
+            if not self.walking:
+                self.image = self.standing_frames[self.current_frame]
+            else:
+                self.image = self.walking_frames[self.current_frame]
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
     def update(self):
@@ -231,7 +274,6 @@ class Player(pg.sprite.Sprite):
         if not self.cooling:
             self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
-        
 class PewPew(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.pew_pews
@@ -249,11 +291,15 @@ class PewPew(pg.sprite.Sprite):
         print("I created a pew pew...")
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
-        # if hits:
-        #     if str(hits[0].__class__.__name__) == "Coin":
-        #         self.moneybag += 1
+        if hits:
+            if str(hits[0].__class__.__name__) == "Mob":
+                hits[0].hitpoints -= 1
+                print(hits[0].hitpoints)
+            if str(hits[0].__class__.__name__) == "Mob2":
+                hits[0].hitpoints -= 1
+            # self.kill()
     def update(self):
-        self.collide_with_group(self.game.mobs, True)
+        self.collide_with_group(self.game.mobs, False)
         self.rect.x += self.dir[0]*self.speed
         self.rect.y += self.dir[1]*self.speed
         # pass
@@ -365,7 +411,8 @@ class Mob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = randint(1,3)
-        self.hitpoints = 5
+        self.hitpoints = 32
+
         print("created mob at", self.rect.x, self.rect.y)
     def collide_with_walls(self, dir):
         if dir == 'x':
@@ -389,13 +436,26 @@ class Mob(pg.sprite.Sprite):
             self.vy = 100
         if self.rect.y > self.game.player.rect.y:
             self.vy = -100
+    def draw_health(self):
+        if self.hitpoints > 31:
+            col = GREEN
+        elif self.hitpoints > 15:
+            col = YELLOW
+        else:
+            col = RED
+        width = int(self.rect.width * self.hitpoints / MOB_HITPOINTS)
+        self.health_bar = pg.Rect(0, 0, width, 7)
+        if self.hitpoints < MOB_HITPOINTS:
+            pg.draw.rect(self.image, col, self.health_bar)
+
+    
     def update(self):
         if self.hitpoints < 1:
             self.kill()
         # self.image.blit(self.game.screen, self.pic)
         # pass
         # # self.rect.x += 1
-        self.chasing()
+        # self.chasing()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
@@ -426,6 +486,7 @@ class Mob2(pg.sprite.Sprite):
         self.speed = 100
         self.chasing = True
         # self.health = MOB_HEALTH
+        self.hitpoints = MOB_HITPOINTS
         self.hitpoints = 100
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
