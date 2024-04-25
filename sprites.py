@@ -58,8 +58,6 @@ class HealthBar(pg.sprite.Sprite):
         self.rect.x = self.target.rect.x
         self.rect.y = self.target.rect.y
 
-
-
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -221,7 +219,7 @@ class Player(pg.sprite.Sprite):
                     self.status = "Invincible"
             if str(hits[0].__class__.__name__) == "Mob":
                 self.hitpoints -= 1
-                hits[0].hitpoints -= 1
+                hits[0].health -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
     # needed for animated sprite
@@ -411,7 +409,8 @@ class Mob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = randint(1,3)
-        self.hitpoints = 32
+        self.health = 32
+        self.max_health = 32
 
         print("created mob at", self.rect.x, self.rect.y)
     def collide_with_walls(self, dir):
@@ -436,21 +435,33 @@ class Mob(pg.sprite.Sprite):
             self.vy = 100
         if self.rect.y > self.game.player.rect.y:
             self.vy = -100
+  
     def draw_health(self):
-        if self.hitpoints > 31:
-            col = GREEN
-        elif self.hitpoints > 15:
-            col = YELLOW
-        else:
-            col = RED
-        width = int(self.rect.width * self.hitpoints / MOB_HITPOINTS)
-        self.health_bar = pg.Rect(0, 0, width, 7)
-        if self.hitpoints < MOB_HITPOINTS:
-            pg.draw.rect(self.image, col, self.health_bar)
+        # calculate health ratio
+        health_ratio = self.health / self.max_health
+        # calculate width of health bar
+        health_width = int(self.rect.width * health_ratio)
+        # create health bar
+        health_bar = pg.Rect(0, 0, health_width, 7)
+        # position health bar
+        health_bar.midtop = self.rect.midtop
+        # draw health bar
+        pg.draw.rect(self.image, GREEN, health_bar)
+    # def draw_health(self):
+    #     if self.hitpoints > 31:
+    #         col = GREEN
+    #     elif self.hitpoints > 15:
+    #         col = YELLOW
+    #     else:
+    #         col = RED
+    #     width = int(self.rect.width * self.hitpoints / MOB_HITPOINTS)
+    #     self.health_bar = pg.Rect(0, 0, width, 7)
+    #     if self.hitpoints < MOB_HITPOINTS:
+    #         pg.draw.rect(self.image, col, self.health_bar)
 
     
     def update(self):
-        if self.hitpoints < 1:
+        if self.health < 1:
             self.kill()
         # self.image.blit(self.game.screen, self.pic)
         # pass

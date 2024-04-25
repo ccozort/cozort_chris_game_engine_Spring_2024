@@ -16,7 +16,7 @@ class Player(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.moneybag = 0
-        self.speed = 100
+        self.speed = 400
     
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -87,8 +87,52 @@ class Player(pg.sprite.Sprite):
           
         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
         # if coin_hits:
-        #     print("I got a coin")
-       
+        #     print("I got a coin")     
+
+class Bat(pg.sprite.Sprite):
+    def __init__(self, game, player):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.player = player
+        self.image = pg.Surface((TILESIZE*2, TILESIZE // 4))
+        self.image.fill(RED)  # Color the bat red
+        self.rect = self.image.get_rect()
+        self.rect.center = self.player.rect.center
+
+    def update(self):
+        self.rect.x = self.player.rect.centerx
+        self.rect.y = self.player.rect.top - self.rect.height // 2
+
+        # Swing bat
+        keys = pg.key.get_pressed()
+        if keys[pg.K_SPACE]:  # Use spacebar to swing
+            self.rect.x += 50 if self.player.vx >= 0 else -50  # Swing direction based on player facing
+
+class Ball(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((20, 20))  # Smaller circular ball
+        self.image.fill(WHITE)  # Color the ball white
+        self.rect = self.image.get_rect()
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.speedx = 5  # Initial speed
+        self.speedy = -5
+
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+
+        # Bounce off walls and ceiling
+        if self.rect.right >= self.game.screen.get_width() or self.rect.left <= 0:
+            self.speedx *= -1
+        if self.rect.top <= 0:
+            self.speedy *= -1
 
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):

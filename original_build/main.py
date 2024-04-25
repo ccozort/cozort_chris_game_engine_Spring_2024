@@ -3,11 +3,29 @@
 # import libraries and modules
 import pygame as pg
 from settings import *
-from sprites import *
+from og_sprites import *
 from random import randint
 import sys
 from os import path
 
+import time
+
+class Timer:
+    def __init__(self, duration):
+        self.start_time = None
+        self.duration = duration
+
+    def start(self):
+        self.start_time = time.time()
+
+    def is_done(self):
+        if self.start_time is None:
+            return False
+        elapsed_time = time.time() - self.start_time
+        return elapsed_time >= self.duration
+
+    def reset(self):
+        self.start_time = None
 
 # Define game class...
 class Game:
@@ -41,7 +59,9 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.newthings = pg.sprite.Group()
-        # self.player1 = Player(self, 1, 1)
+        self.cooldown_timer = Timer(5)  # 5 second cooldown
+        self.cooldown_timer.start()
+
         # for x in range(10, 20):
         #     Wall(self, x, 5)
         for row, tiles in enumerate(self.map_data):
@@ -55,9 +75,9 @@ class Game:
                     self.player = Player(self, col, row)
                 if tile == 'C':
                     Coin(self, col, row)
-                if tile == 'N':
-                    NewThing(self, col, row)
 
+        self.bat = Bat(self, self.player)
+        self.ball = Ball(self, 5, 5)
     def run(self):
         # 
         self.playing = True
@@ -72,7 +92,15 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
-    
+        hits = pg.sprite.spritecollide(self.bat, [self.ball], False)
+        if hits:
+            self.ball.speedx *= -1  # Change direction of the ball
+            self.ball.speedy *= -1  # Optionally change the vertical direction too
+        if self.cooldown_timer.is_done():
+    # cooldown is over, do something
+                self.cooldown_timer.reset()
+                self.cooldown_timer.start()
+                print("cooldown is over")
     def draw_grid(self):
          for x in range(0, WIDTH, TILESIZE):
               pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))

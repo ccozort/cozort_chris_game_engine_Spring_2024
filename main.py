@@ -19,7 +19,7 @@ Secondary goal: add sprite graphics for all elements
 
 Release version:
 Jumping - requires sprite scale and collision detection so that player can stand on walls.
-May require adjusting sprite images
+May require adjusting sprite imagessa
 
 '''
 import pygame as pg
@@ -37,6 +37,10 @@ from math import floor
 # added level values for multiple maps
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
+LEVEL3 = "level3.txt"
+LEVEL4 = "level4.txt"
+
+levels = [LEVEL1, LEVEL2, LEVEL3, LEVEL4]
 
 
 
@@ -55,13 +59,14 @@ class Game:
         # self.load_data()
         self.running = True
         self.paused = False
+        self.current_level = 0
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
         self.snd_folder = path.join(self.game_folder, 'sounds')
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
-        self.map = Map(path.join(game_folder, 'level4.txt'))
+        self.map = Map(path.join(game_folder, levels[self.current_level]))
         self.background_img = pg.image.load(path.join(self.img_folder, 'background.png')).convert_alpha()
         self.background_rect = self.background_img.get_rect()
         self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
@@ -91,6 +96,8 @@ class Game:
                 print(line)
                 self.map_data.append(line)
         # repopulate the level with stuff
+        for i in range (0,10):
+            Coin(self, randint(0,32), randint(0,24))
         for row, tiles in enumerate(self.map.data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -107,8 +114,7 @@ class Game:
                 if tile == 'm':
                     Mob2(self, col, row)
                 if tile == 'U':
-                    PowerUp(self, col, row)
-                   
+                    PowerUp(self, col, row)             
 
     # Create run method which runs the whole GAME
     def new(self):
@@ -178,7 +184,8 @@ class Game:
             if self.player.hitpoints < 1:
                 self.playing = False
             if self.player.moneybag > 2:
-                self.change_level(LEVEL2)
+                self.current_level += 1
+                self.change_level(levels[self.current_level])
             if self.mob_timer.cd < 1:
                 Mob(self, randint(1,25), randint(1,25))
                 self.mob_timer.cd = 2
@@ -218,7 +225,7 @@ class Game:
             # draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             # for m in self.mobs:
             #     draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
-            pg.display.flip()
+            # pg.display.flip()
 
     def events(self):
          for event in pg.event.get():
