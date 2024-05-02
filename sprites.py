@@ -59,10 +59,11 @@ class HealthBar(pg.sprite.Sprite):
         self.rect.y = self.target.rect.y
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, controls):
         self.groups = game.all_sprites
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
+        # super.__init__(self, self.groups)
         self.game = game
         # self.image = pg.Surface((TILESIZE, TILESIZE))
         # added player image to sprite from the game class...
@@ -103,6 +104,8 @@ class Player(pg.sprite.Sprite):
         self.weapon = Weapon(self.game, self.weapon_type,self.rect.x, self.rect.y, 16, 16, (0,0))
         self.points = 0
         self.can_collide = True
+        self.controls = controls
+        print("player was instantiated")
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
@@ -140,16 +143,15 @@ class Player(pg.sprite.Sprite):
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
          
-        if keys[pg.K_t]:
-            self.game.change_level("level3.txt")
+
         if keys[pg.K_e]:
             self.weapon = Weapon(self.game, self.weapon_type, self.rect.x+TILESIZE*self.dir[0], self.rect.y+TILESIZE*self.dir[1], abs(self.dir[0]*32+5), abs(self.dir[1]*32+5), self.dir)
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
+        if keys[self.controls[0]]:
             self.vx = -self.speed
             self.set_dir((-1,0))
             self.walking = True
             
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+        if keys[self.controls[1]]:
             self.vx = self.speed
             self.set_dir((1,0))
             self.walking = True
@@ -160,15 +162,13 @@ class Player(pg.sprite.Sprite):
             self.vy = self.speed
             self.set_dir((0,1))
         if keys[pg.K_e]:
-            print("trying to shoot...")
             self.pew()
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071      
     def pew(self):
         p = PewPew(self.game, self.rect.x, self.rect.y)
-        print(p.rect.x)
-        print(p.rect.y)
+
     # def move(self, dx=0, dy=0):
     #     if not self.collide_with_walls(dx, dy):
     #         self.x += dx
@@ -208,12 +208,10 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
                 self.points += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
-                print(hits[0].__class__.__name__)
                 # self.game.collect_sound.play()
                 effect = choice(POWER_UP_EFFECTS)
                 self.game.cooldown.cd = 5
                 self.cooling = True
-                print(self.cooling)
                 self.speed += 200
                 if effect == "Invincible":
                     self.status = "Invincible"
@@ -292,7 +290,7 @@ class PewPew(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Mob":
                 hits[0].hitpoints -= 1
-                print(hits[0].hitpoints)
+                # print(hits[0].hitpoints)
             if str(hits[0].__class__.__name__) == "Mob2":
                 hits[0].hitpoints -= 1
             # self.kill()
@@ -395,7 +393,7 @@ class PowerUp(pg.sprite.Sprite):
         self.rect.y = y * TILESIZE
         
 class Mob(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, speed):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -408,7 +406,7 @@ class Mob(pg.sprite.Sprite):
         self.vx, self.vy = 100, 100
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.speed = randint(1,3)
+        self.speed = speed
         self.health = 32
         self.max_health = 32
 
@@ -475,7 +473,7 @@ class Mob(pg.sprite.Sprite):
         self.collide_with_walls('y')
 
 class Mob2(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, speed):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -494,7 +492,7 @@ class Mob2(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         # added
-        self.speed = 100
+        self.speed = speed
         self.chasing = True
         # self.health = MOB_HEALTH
         self.hitpoints = MOB_HITPOINTS

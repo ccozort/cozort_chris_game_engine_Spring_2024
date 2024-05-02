@@ -43,7 +43,6 @@ LEVEL4 = "level4.txt"
 levels = [LEVEL1, LEVEL2, LEVEL3, LEVEL4]
 
 
-
 # Define game class...
 class Game:
     # Define a special method to init the properties of said class...
@@ -60,6 +59,7 @@ class Game:
         self.running = True
         self.paused = False
         self.current_level = 0
+        self.wave = 0
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
         self.game_folder = path.dirname(__file__)
@@ -148,15 +148,18 @@ class Game:
                 if tile == '1':
                     print("a wall at", row, col)
                     Wall(self, col, row)
+                if tile == 'p':
+                    self.player = Player(self, col, row, [pg.K_d, pg.K_a])
+                    print("player created")
                 if tile == 'P':
-                    self.player = Player(self, col, row)
+                    self.player = Player(self, col, row, [pg.K_l, pg.K_j])
                     print("player created")
                 # if tile == 'C':
                 #     Coin(self, col, row)
                 if tile == 'M':
-                    Mob(self, col, row)
+                    Mob(self, col, row, MOB_BASE_SPEED)
                 if tile == 'm':
-                    Mob2(self, col, row)
+                    Mob2(self, col, row, MOB_BASE_SPEED)
                 if tile == 'U':
                     PowerUp(self, col, row)
         self.camera = Camera(self.map.width, self.map.height)
@@ -176,7 +179,6 @@ class Game:
     def update(self):
         # tick the test timer
         if not self.paused:
-            
             self.cooldown.ticking()
             self.mob_timer.ticking()
             self.all_sprites.update()
@@ -187,7 +189,8 @@ class Game:
                 self.current_level += 1
                 self.change_level(levels[self.current_level])
             if self.mob_timer.cd < 1:
-                Mob(self, randint(1,25), randint(1,25))
+                self.wave += 1
+                Mob(self, randint(1,25), randint(1,25), MOB_BASE_SPEED*self.wave)
                 self.mob_timer.cd = 2
     
     def draw_grid(self):
@@ -225,7 +228,7 @@ class Game:
             # draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             # for m in self.mobs:
             #     draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
-            # pg.display.flip()
+            pg.display.flip()
 
     def events(self):
          for event in pg.event.get():
