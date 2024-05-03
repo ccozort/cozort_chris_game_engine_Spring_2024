@@ -111,28 +111,21 @@ class Player(pg.sprite.Sprite):
         # return (0,0)
     def get_dir(self):
         return self.dir
+    
+    def teleport(self, direction):
+        self.x += TILESIZE * 2 * direction[0]
+        self.y += TILESIZE * 2 * direction[1]
+        # if direction == "up":
+        #     self.y -= TILESIZE * 3
+        # elif direction == "down":
+        #     self.y += TILESIZE * 3
+        # elif direction == "left":
+        #     self.x -= TILESIZE * 3
+        # elif direction == "right":
+        #     self.x += TILESIZE * 3
     def get_mouse(self):
         if pg.mouse.get_pressed()[0]:
             self.weapon = Weapon(self.game, self.weapon_type, self.rect.x+TILESIZE*self.dir[0], self.rect.y+TILESIZE*self.dir[1], abs(self.dir[0]*32+5), abs(self.dir[1]*32+5), self.dir)
-
-            # mx = pg.mouse.get_pos()[0]
-            # my = pg.mouse.get_pos()[1]
-            # if self.weapon_drawn == False:
-            #     self.weapon_drawn = True
-            #     if abs(pg.mouse.get_pos()[0]-self.rect.x) > abs(pg.mouse.get_pos()[1]-self.rect.y):
-            #         if pg.mouse.get_pos()[0]-self.rect.x > 0:
-            #             print("swing to pos x")
-            #             self.weapon = Weapon(self.game, 'sword', self.rect.x+TILESIZE, self.rect.y, 32, 5, (1,0))
-            #         if pg.mouse.get_pos()[0]-self.rect.x < 0:
-            #             print("swing to neg x")
-            #             self.weapon = Weapon(self.game, 'sword', self.rect.x-TILESIZE, self.rect.y, 32, 5, (-1,0))
-            #     else:
-            #         if pg.mouse.get_pos()[1]-self.rect.y > 0:
-            #             print("swing to pos y")
-            #             self.weapon = Weapon(self.game, 'sword', self.rect.x, self.rect.y+self.rect.height, 5, 32, (0,1))
-            #         if pg.mouse.get_pos()[1]-self.rect.y < 0:
-            #             print("swing to neg y")
-            #             self.weapon = Weapon(self.game, 'sword', self.rect.x, self.rect.y-self.rect.height, 5, 32, (0,-1))
 
         if pg.mouse.get_pressed()[1]:
             print("middle click")
@@ -142,22 +135,22 @@ class Player(pg.sprite.Sprite):
         self.walking = False
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
-         
-
         if keys[pg.K_e]:
             self.weapon = Weapon(self.game, self.weapon_type, self.rect.x+TILESIZE*self.dir[0], self.rect.y+TILESIZE*self.dir[1], abs(self.dir[0]*32+5), abs(self.dir[1]*32+5), self.dir)
+        if keys[pg.K_SPACE]:
+            self.teleport(self.get_dir())
         if keys[self.controls[0]]:
             self.vx = -self.speed
             self.set_dir((-1,0))
             self.walking = True
-            
         if keys[self.controls[1]]:
             self.vx = self.speed
-            self.set_dir((1,0))
+            self.set_dir((1,0))            
             self.walking = True
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.vy = -self.speed
             self.set_dir((0,-1))
+            self.rect.y = 300
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
             self.set_dir((0,1))
@@ -220,6 +213,11 @@ class Player(pg.sprite.Sprite):
                 hits[0].health -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
+            if str(hits[0].__class__.__name__) == "Mob2":
+                self.hitpoints -= 1
+                hits[0].health -= 1
+                if self.status == "Invincible":
+                    print("you can't hurt me")
     # needed for animated sprite
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
@@ -249,7 +247,7 @@ class Player(pg.sprite.Sprite):
             self.rect.bottom = bottom
     def update(self):
         # needed for animated sprite
-        self.animate()
+        # self.animate()
         self.get_keys()
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
@@ -478,9 +476,9 @@ class Mob2(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         # self.image = game.mob_img
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(ORANGE)
-        self.image = self.game.mob2_img
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(ORANGE)
+        # self.image = self.game.mob_img
         # self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.hit_rect = MOB_HIT_RECT.copy()
@@ -497,6 +495,7 @@ class Mob2(pg.sprite.Sprite):
         # self.health = MOB_HEALTH
         self.hitpoints = MOB_HITPOINTS
         self.hitpoints = 100
+        self.health = 100
     def sensor(self):
         if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
             self.chasing = True
@@ -505,10 +504,10 @@ class Mob2(pg.sprite.Sprite):
     def update(self):
         if self.hitpoints <= 0:
             self.kill()
-        # self.sensor()
+        self.sensor()
         if self.chasing:
             self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
-            self.image = pg.transform.rotate(self.game.mob2_img, self.rot)
+            self.image = pg.transform.rotate(self.game.mob_img, self.rot)
             self.rect = self.image.get_rect()
             self.rect.center = self.pos
             self.acc = vec(self.speed, 0).rotate(-self.rot)

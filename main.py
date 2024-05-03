@@ -149,7 +149,7 @@ class Game:
                     print("a wall at", row, col)
                     Wall(self, col, row)
                 if tile == 'p':
-                    self.player = Player(self, col, row, [pg.K_d, pg.K_a])
+                    self.player = Player(self, col, row, [pg.K_a, pg.K_d])
                     print("player created")
                 if tile == 'P':
                     self.player = Player(self, col, row, [pg.K_l, pg.K_j])
@@ -157,7 +157,7 @@ class Game:
                 # if tile == 'C':
                 #     Coin(self, col, row)
                 if tile == 'M':
-                    Mob(self, col, row, MOB_BASE_SPEED)
+                    Mob2(self, col, row, MOB_BASE_SPEED)
                 if tile == 'm':
                     Mob2(self, col, row, MOB_BASE_SPEED)
                 if tile == 'U':
@@ -183,14 +183,14 @@ class Game:
             self.mob_timer.ticking()
             self.all_sprites.update()
             self.camera.update(self.player)
-            if self.player.hitpoints < 1:
+            if self.player.hitpoints < 1: 
                 self.playing = False
             if self.player.moneybag > 2:
                 self.current_level += 1
                 self.change_level(levels[self.current_level])
             if self.mob_timer.cd < 1:
                 self.wave += 1
-                Mob(self, randint(1,25), randint(1,25), MOB_BASE_SPEED*self.wave)
+                Mob2(self, randint(1,25), randint(1,25), MOB_BASE_SPEED*self.wave)
                 self.mob_timer.cd = 2
     
     def draw_grid(self):
