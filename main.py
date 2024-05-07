@@ -134,6 +134,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
+        self.collectibles = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.weapons = pg.sprite.Group()
         self.pew_pews = pg.sprite.Group()
@@ -159,8 +160,8 @@ class Game:
                 if tile == 'P':
                     self.player = Player(self, col, row, [pg.K_l, pg.K_j])
                     print("player created")
-                # if tile == 'C':
-                #     Coin(self, col, row)
+                if tile == 'c':
+                    Collectible(self, col, row)
                 if tile == 'M':
                     Mob2(self, col, row, MOB_BASE_SPEED)
                 if tile == 'm':

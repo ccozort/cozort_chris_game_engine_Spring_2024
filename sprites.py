@@ -225,6 +225,7 @@ class Player(pg.sprite.Sprite):
                     print("you can't hurt me")
             if str(hits[0].__class__.__name__) == "Collectible":
                 print("you collected a collectible")
+                hits[0].attached = True
     # needed for animated sprite
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
@@ -270,6 +271,7 @@ class Player(pg.sprite.Sprite):
         self.get_mouse()
         # added coin collection with a cooldown setting
         self.collide_with_group(self.game.coins, True)
+        self.collide_with_group(self.game.collectibles, False)
         if self.game.cooldown.cd < 1:
             self.cooling = False
         if not self.cooling:
@@ -396,12 +398,15 @@ class Collectible(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+        self.attached = False
     def attach(self, player):
-        self.rect.x = player.rect.x
-        self.rect.y = player.rect.y
-        self.x = player.rect.x
-        self.y = player.rect.y
+        self.rect.x = player.rect.x + 16
+        self.rect.y = player.rect.y + 16
+        self.x = player.rect.x + 16
+        self.y = player.rect.y + 16
     def update(self):
+        if self.attached:
+            self.attach(self.game.player)
         self.rect.x = self.x
         self.rect.y = self.y
 
