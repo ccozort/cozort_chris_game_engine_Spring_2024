@@ -40,6 +40,7 @@ LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
 LEVEL4 = "level4.txt"
 
+# add levels to a list
 levels = [LEVEL1, LEVEL2, LEVEL3, LEVEL4]
 
 
@@ -66,6 +67,7 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'images')
         self.snd_folder = path.join(self.game_folder, 'sounds')
         self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
+        # this is how we create the map object
         self.map = Map(path.join(game_folder, levels[self.current_level]))
         self.background_img = pg.image.load(path.join(self.img_folder, 'background.png')).convert_alpha()
         self.background_rect = self.background_img.get_rect()
@@ -136,6 +138,9 @@ class Game:
         self.weapons = pg.sprite.Group()
         self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+        self.overlay = pg.Surface((WIDTH, HEIGHT))
+        self.overlay.set_alpha(128)  # Set transparency (0 = fully transparent, 255 = fully opaque)
+        self.overlay.fill(WHITE)  # Fill the surface with a color
         for i in range (0,10):
             Coin(self, randint(0,32), randint(0,24))
         # self.player1 = Player(self, 1, 1)
@@ -228,6 +233,7 @@ class Game:
             # draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             # for m in self.mobs:
             #     draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
+            self.screen.blit(self.overlay, (0, 0))
             pg.display.flip()
 
     def events(self):
@@ -284,4 +290,5 @@ g.show_start_screen()
 while True:
     g.new()
     g.run()
+    # g.show_shop_screen()
     g.show_go_screen()

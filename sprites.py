@@ -106,12 +106,16 @@ class Player(pg.sprite.Sprite):
         self.can_collide = True
         self.controls = controls
         print("player was instantiated")
+    # needed for setting directions for teleportation
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
+    # needed for getting directions for teleportation
     def get_dir(self):
         return self.dir
     
+    # modified from co-pilot plugin suggestion
+    # used to teleport player in a direction with a key press
     def teleport(self, direction):
         self.x += TILESIZE * 2 * direction[0]
         self.y += TILESIZE * 2 * direction[1]
@@ -137,6 +141,7 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
         if keys[pg.K_e]:
             self.weapon = Weapon(self.game, self.weapon_type, self.rect.x+TILESIZE*self.dir[0], self.rect.y+TILESIZE*self.dir[1], abs(self.dir[0]*32+5), abs(self.dir[1]*32+5), self.dir)
+        # passes the direction of the player in order to teleport in that direction with the space bar
         if keys[pg.K_SPACE]:
             self.teleport(self.get_dir())
         if keys[self.controls[0]]:
@@ -218,6 +223,8 @@ class Player(pg.sprite.Sprite):
                 hits[0].health -= 1
                 if self.status == "Invincible":
                     print("you can't hurt me")
+            if str(hits[0].__class__.__name__) == "Collectible":
+                print("you collected a collectible")
     # needed for animated sprite
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
@@ -376,6 +383,27 @@ class Coin(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+class Collectible(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.collectibles
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(PINK)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def attach(self, player):
+        self.rect.x = player.rect.x
+        self.rect.y = player.rect.y
+        self.x = player.rect.x
+        self.y = player.rect.y
+    def update(self):
+        self.rect.x = self.x
+        self.rect.y = self.y
 
 class PowerUp(pg.sprite.Sprite):
     def __init__(self, game, x, y):
