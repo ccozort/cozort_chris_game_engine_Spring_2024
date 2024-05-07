@@ -264,6 +264,11 @@ class Game:
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
+    def show_shop_screen(self):
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "This is the SHOP screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
     def show_go_screen(self):
         # if not self.running:
         #     return
@@ -291,5 +296,5 @@ g.show_start_screen()
 while True:
     g.new()
     g.run()
-    # g.show_shop_screen()
+    g.show_shop_screen()
     g.show_go_screen()
