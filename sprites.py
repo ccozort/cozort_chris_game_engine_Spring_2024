@@ -6,6 +6,8 @@ from utils import *
 from random import choice
 from random import randint
 from os import path
+from math import *
+from math import degrees
 
 
 vec =pg.math.Vector2
@@ -65,17 +67,23 @@ class Player(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         # super.__init__(self, self.groups)
         self.game = game
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = pg.Surface((TILESIZE, TILESIZE))
         # added player image to sprite from the game class...
         # needed for animated sprite
         self.spritesheet = Spritesheet(path.join(img_folder, SPRITESHEET))
         # needed for animated sprite
         self.load_images()
         
-        # self.image = game.player_img
-        # self.image.fill(GREEN)
+       
         # needed for animated sprite
-        self.image = self.standing_frames[0]
+        # self.image = self.standing_frames[0]
+        # self.original_image = self.standing_frames[0]
+        self.original_image = self.image
+        self.original_image.fill(GREEN)
+        # self.image = self.original_image.copy()
+        # self.image = game.player_img
+        self.image.fill(BLACK)
+        # self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
@@ -91,6 +99,8 @@ class Player(pg.sprite.Sprite):
         self.weapon_dir = (0,0)
         self.pos = vec(0,0)
         self.dir = vec(0,0)
+        self.rot = 0
+        self.angle = 0
         # needed for animated sprite
         self.current_frame = 0
         # needed for animated sprite
@@ -106,14 +116,21 @@ class Player(pg.sprite.Sprite):
         self.can_collide = True
         self.controls = controls
         print("player was instantiated")
+        self.j_timer = AITimer(1)
     # needed for setting directions for teleportation
     def set_dir(self, d):
         self.dir = d
         # return (0,0)
     # needed for getting directions for teleportation
     def get_dir(self):
-        return self.dir
-    
+        return vec(self.dir)
+    def jump(self):
+        self.j_timer = AITimer(1)
+        self.j_timer.start()
+        self.image = pg.Surface((32, 32))
+        self.image = pg.transform.scale(self.image, (64, 64))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
     # modified from co-pilot plugin suggestion
     # used to teleport player in a direction with a key press
     def teleport(self, direction):
@@ -144,6 +161,8 @@ class Player(pg.sprite.Sprite):
         # passes the direction of the player in order to teleport in that direction with the space bar
         if keys[pg.K_SPACE]:
             self.teleport(self.get_dir())
+        if keys[pg.K_f]:
+            self.jump()
         if keys[self.controls[0]]:
             self.vx = -self.speed
             self.set_dir((-1,0))
@@ -205,8 +224,9 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
                 self.points += 1
+                self.game.collect_sound.play()
             if str(hits[0].__class__.__name__) == "PowerUp":
-                # self.game.collect_sound.play()
+                self.game.collect_sound.play()
                 effect = choice(POWER_UP_EFFECTS)
                 self.game.cooldown.cd = 5
                 self.cooling = True
@@ -257,6 +277,12 @@ class Player(pg.sprite.Sprite):
         # needed for animated sprite
         # self.animate()
         self.get_keys()
+        if self.j_timer.is_done():
+            self.j_timer.reset()
+            self.image = pg.Surface((32, 32))
+            self.image.fill(GREEN)
+            self.rect = self.image.get_rect()
+
         # self.power_up_cd.ticking()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
@@ -277,6 +303,18 @@ class Player(pg.sprite.Sprite):
         if not self.cooling:
             self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
+        # get mouse position
+        # mx, my = pg.mouse.get_pos()
+        # calculate angle to mouse
+        # dx = mx - self.rect.centerx
+        # dy = my - self.rect.centery
+        # angle = degrees(atan2(-dy, dx)) - 90
+        self.angle += 25
+
+        # rotate image
+        self.image = pg.transform.rotate(self.original_image, self.angle)
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect(center=self.rect.center)
 class PewPew(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.pew_pews
@@ -385,6 +423,27 @@ class Coin(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+class TransparentCircleOverSquare(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.x = x
+        self.y = y
+        self.radius = WIDTH/2  # start with a radius of 1
+        self.image = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)  # Create a 100x100 surface
+        pg.draw.rect(self.image, RED, (0, 0, WIDTH, HEIGHT))  # Draw a red square
+        pg.draw.circle(self.image, (0, 0, 0, 0), (WIDTH/2, HEIGHT/2), self.radius)  # Draw a transparent circle
+        self.rect = self.image.get_rect(topleft=(x*TILESIZE, y*TILESIZE))
+
+    def update(self):
+        pass
+        self.radius -= .1  # increase the radius
+        self.image = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
+        pg.draw.rect(self.image, RED, (0, 0, WIDTH, HEIGHT))  # Draw a red square
+        pg.draw.circle(self.image, (0, 0, 0, 0), (WIDTH/2, HEIGHT/2), self.radius)
+        
+        self.rect = self.image.get_rect()
 
 class Collectible(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -399,6 +458,7 @@ class Collectible(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         self.attached = False
+        self.category = "collectible"
     def attach(self, player):
         self.rect.x = player.rect.x + 16
         self.rect.y = player.rect.y + 16

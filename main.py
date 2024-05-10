@@ -82,8 +82,7 @@ class Game:
         # with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
         #     for line in f:
         #         print(line)
-        #         self.map_data.append(line)
-    # added level change method
+        #         self.map_data.append(line) 
     def change_level(self, lvl):
         # kill all existing sprites first to save memory
         for s in self.all_sprites:
@@ -125,6 +124,7 @@ class Game:
         pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.wav'))
         self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
         self.sword_sound = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.wav'))
+        
         # create timer
         self.countdown_time = 35
         self.cooldown = Timer(self)
@@ -139,9 +139,9 @@ class Game:
         self.weapons = pg.sprite.Group()
         self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
-        self.overlay = pg.Surface((WIDTH, HEIGHT))
-        self.overlay.set_alpha(128)  # Set transparency (0 = fully transparent, 255 = fully opaque)
-        self.overlay.fill(WHITE)  # Fill the surface with a color
+        # self.overlay = pg.Surface((WIDTH, HEIGHT))
+        # self.overlay.set_alpha(128)  # Set transparency (0 = fully transparent, 255 = fully opaque)
+        # self.overlay.fill(WHITE)  # Fill the surface with a color
         for i in range (0,10):
             Coin(self, randint(0,32), randint(0,24))
         # self.player1 = Player(self, 1, 1)
@@ -168,6 +168,10 @@ class Game:
                     Mob2(self, col, row, MOB_BASE_SPEED)
                 if tile == 'U':
                     PowerUp(self, col, row)
+                # if tile == 'C':
+                #     self.expand_circle = ExpandingCircle(self, col, row)
+                if tile == 'T':
+                    self.expand_circle = TransparentCircleOverSquare(self, col, row)
         self.camera = Camera(self.map.width, self.map.height)
     def run(self):
         # start playing sound on infinite loop (loops=-1)
@@ -189,6 +193,7 @@ class Game:
             self.mob_timer.ticking()
             self.all_sprites.update()
             self.camera.update(self.player)
+            
             if self.player.hitpoints < 1: 
                 self.playing = False
             if self.player.moneybag > 2:
@@ -234,7 +239,8 @@ class Game:
             # draw_health_bar(self.screen, self.player.rect.x, self.player.rect.y-8, self.player.hitpoints)
             # for m in self.mobs:
             #     draw_health_bar(self.screen, m.rect.x, m.rect.y-8, m.hitpoints*20)
-            self.screen.blit(self.overlay, (0, 0))
+            # self.screen.blit(self.overlay, (0, 0))
+            self.expand_circle.update()
             pg.display.flip()
 
     def events(self):

@@ -1,6 +1,8 @@
 # this 'cooldown' class is designed to help us control time
 import pygame as pg
 
+import time
+
 from math import floor
 
 def test_func():
@@ -42,6 +44,23 @@ def collide_with_walls(sprite, group, dir):
             sprite.hit_rect.centery = sprite.pos.y
 
 
+
+class AITimer:
+    def __init__(self, duration):
+        self.start_time = None
+        self.duration = duration
+
+    def start(self):
+        self.start_time = time.time()
+
+    def is_done(self):
+        if self.start_time is None:
+            return False
+        elapsed_time = time.time() - self.start_time
+        return elapsed_time >= self.duration
+
+    def reset(self):
+        self.start_time = None
 
 class Timer():
     # sets all properties to zero when instantiated...
